@@ -1,0 +1,21 @@
+# Ignore output figures
+/plot/*.pdf
+
+# Ignore data files (optional)
+data/**/*.txt
+
+# Ignore Python/Jupyter artifacts
+__pycache__/
+*.pyc
+*.ipynb_checkpoints
+
+# Ignore Julia compiled files and packages
+.julia/
+Manifest.toml
+Project.toml
+
+# Ignore VS Code settings
+.vscode/
+
+# Mac system files
+.DS_Store
