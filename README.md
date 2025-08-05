@@ -59,7 +59,7 @@ Use the Python notebook in `plot/`:
 
 ```bash
 cd plot
-jupyter notebook analysis.ipynb
+jupyter notebook plots.ipynb
 ```
 ---
 
