@@ -1,4 +1,4 @@
-# --- Qurnched 2x2 density matrix ---
+# --- Quenched 2x2 density matrix ---
 function QuenchedDensityMatrix(pre_quench, post_quench, k, t)
     # pre_quench: parameters before the quench
     # post_quench: parameters after the quench
@@ -19,7 +19,7 @@ end
 function CorrelationMomentumSpace(pre_quench, post_quench, corr, r, k, t)
     # pre_quench: parameters before the quench
     # post_quench: parameters after the quench
-    # corr: correlation type (e.g., "density", "spin")
+    # corr: matrix entrance and type (real or imag)
     # r: distance
     # k: wavevector
     # t: time

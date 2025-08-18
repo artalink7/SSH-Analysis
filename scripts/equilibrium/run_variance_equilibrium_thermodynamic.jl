@@ -4,7 +4,6 @@ using SSHAnalysis
 # Define parameters
 
 pre_quench  = (φ=0, w=0.7, v=1, V=0.0)
-post_quench = (φ=0, w=1, v=0.7, V=0.0)
 style = "continuos"
 N_cells = 20
 

@@ -1,7 +1,8 @@
 function SingleVariance(pre_quench, post_quench, style, L_cells, N_cells, cut, t)
     ρ = DensityMatrix(pre_quench, post_quench, style, L_cells, N_cells, cut, t)
+    ρ = ρ + 0.5.*I  
     norm_squared = sum(abs2, ρ)  # sum of squared absolute values of all elements
-    return L_cells - 0.25.*norm_squared
+    return L_cells - norm_squared
 end
 
 function GenerateDataVarianceEquilibrium(pre_quench, style, N_cells; max_LA = nothing)
@@ -30,9 +31,9 @@ function GenerateDataVariance(pre_quench, post_quench, style, L_cells, N_cells)
 
     # Main loop
     @showprogress 1 for (i, t) in enumerate(time)
-        # --- L - norm ---
         ρ = DensityMatrix(pre_quench, post_quench, style, L_cells, N_cells, "1", t)
-        variance_quench[i] = L_cells - 0.25.*sum(abs2, ρ)
+        ρ = ρ + 0.5.*I 
+        variance_quench[i] = L_cells - sum(abs2, ρ)
     end
     return variance_quench
 end
