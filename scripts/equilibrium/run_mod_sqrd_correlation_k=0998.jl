@@ -3,7 +3,7 @@ using SSHAnalysis
 
 # Define parameters
 
-pre_quench  = (φ=0, w=0.7, v=1, V=0.0)
+pre_quench  = (φ=0, w=0.998, v=1, V=0.0)
 post_quench = (φ=0, w=1, v=0.7, V=0.0)
 style = "continuos"
 N_cells = 200
@@ -18,4 +18,4 @@ end
 
 # Save Data
 data_dir = joinpath(ProjectRoot(), "data", "equilibrium")
-SaveWithTimeStamp(correlation_list, data_dir, "correlation_200_cells_noflux")
+SaveWithTimeStamp(correlation_list, data_dir, "correlation_k=0998_noflux")
