@@ -10,12 +10,12 @@ A Julia-based framework to simulate and analyze the Su-Schrieffer–Heeger (SSH)
 ```
 SSH-Analysis/
 │
-├── data/                  # Output data (entropy, variance, etc.)
+├── data/                  # Output data (entropy, variance, etc.), this folder will be generated upon launching the first script
 │   ├── equilibrium/
 │   └── quench/
 │
 ├── plot/                  # Python notebooks for plotting
-│   └── analysis.ipynb
+│   └── plots.ipynb
 │
 ├── scripts/               # Julia scripts for running simulations
 │   ├── equilibrium/
