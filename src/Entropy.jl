@@ -21,7 +21,7 @@ function GenerateDataEntropyEquilibrium(pre_quench, style, N_cells; max_LA = not
     # L_cells: maximum number of cells in the partition
 
     if max_LA === nothing
-        max_LA = div(N_cells, 2)
+       max_LA = max(div(N_cells, 2), 1) 
     end
 
     LA_range = 1:max_LA
