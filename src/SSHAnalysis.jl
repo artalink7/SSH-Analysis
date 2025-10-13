@@ -13,7 +13,7 @@ using DelimitedFiles
 export GenerateDataEntropy, GenerateDataEntropyEquilibrium, 
        GenerateDataVarianceEquilibrium, GenerateDataVariance,  
        SaveWithTimeStamp, ProjectRoot, RealSpaceDensityM,
-       @showprogress
+       @showprogress, EntanglementEntropy
 
 include("BlochVectors.jl")
 include("DensityMatrix.jl")

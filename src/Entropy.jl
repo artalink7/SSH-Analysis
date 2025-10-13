@@ -35,3 +35,13 @@ function GenerateDataEntropyEquilibrium(pre_quench, style, N_cells; max_LA = not
     end
     return entropy_equilibrium
 end
+
+# --- Entanglement entropy from density matrix eigenvalues ---
+function EntanglementEntropy(pre_quench, post_quench, style, L_cells, N_cells, cut, t; filling_fraction=1.0)
+    eigs = EigenvaluesDensity(pre_quench, post_quench, style, L_cells, N_cells, cut, t; filling_fraction=filling_fraction) 
+
+    eigs = eigs[(eigs .> 1e-12) .& (eigs .< 1 - 1e-12)]
+
+    # Compute von Neumann entropy S = -Tr[ρ log ρ]
+    return -sum(eigs .* log.(eigs) .+ (1 .- eigs) .* log.(1 .- eigs))
+end
