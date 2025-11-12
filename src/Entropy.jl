@@ -40,7 +40,7 @@ end
 function EntanglementEntropy(pre_quench, post_quench, style, L_cells, N_cells, cut, t; filling_fraction=1.0)
     eigs = EigenvaluesDensity(pre_quench, post_quench, style, L_cells, N_cells, cut, t; filling_fraction=filling_fraction) 
 
-    eigs = eigs[(eigs .> 1e-12) .& (eigs .< 1 - 1e-12)]
+    eigs = eigs[(eigs .> 1e-14) .& (eigs .< 1 - 1e-14)]
 
     # Compute von Neumann entropy S = -Tr[ρ log ρ]
     return -sum(eigs .* log.(eigs) .+ (1 .- eigs) .* log.(1 .- eigs))
