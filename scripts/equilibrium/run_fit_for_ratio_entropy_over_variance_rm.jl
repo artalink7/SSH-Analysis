@@ -5,7 +5,7 @@ using StatsPlots
 using LsqFit
 using ProgressMeter
 
-gap = 1e-10
+gap = 0.03
 pre_quench_ssh = [0, 1 , 1, gap/2]
 post_quench_ssh = pre_quench_ssh
 t = 0
@@ -15,9 +15,8 @@ Ratio = zeros(Float64, length(L_cells))
 p = Progress(length(L_cells))
 
 for (i, n) in enumerate(L_cells)
-    Entropy = EntanglementEntropy(pre_quench_ssh, post_quench_ssh, "discrete", n, 2n, "1", t)
-    Variance = SingleVariance(pre_quench_ssh, post_quench_ssh, "discrete", n, 2n, "1", t)
-    Ratio[i] = Entropy / Variance
+    S, V = EntropyandVariance_sub(pre_quench_ssh, post_quench_ssh, "discrete", n, 20000, 0)
+    Ratio[i] = S / V
     next!(p)
 end
 
