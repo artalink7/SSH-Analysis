@@ -1,8 +1,16 @@
 # Ignore output figures
 /plot/*.pdf
+/plot/*.svg
+/plot/*.png
+*.svg
+*.pdf
+*.png
 
 # Ignore data files (optional)
 data/**/*.txt
+data/**/*.csv
+*.csv
+*.txt
 
 # Ignore Python/Jupyter artifacts
 __pycache__/
