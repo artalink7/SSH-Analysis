@@ -81,10 +81,6 @@ function main_gap_sweep()
     # ==================================================
     println("\n=== EXPERIMENT 1: SSH (Varying w, V=$V_fixed) ===")
     
-    # We skip w=1.0 (Critical Point) to avoid gapless DMRG issues
-    # We scan w from 1.1 to 2.0. This corresponds to the Trivial SSH Phase 
-    # (or you can scan 0.0 to 0.9 for Topological).
-    # Let's do a wide scan skipping the critical point.
     w_values = 1.2:0.1:2.0
 
     open("data/equilibrium/data_SSH_gap_sweep_new.csv", "w") do file
