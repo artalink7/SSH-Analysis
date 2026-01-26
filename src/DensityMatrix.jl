@@ -149,7 +149,6 @@ end
 # eigenvalues of subsystem correlation matrix, memory-efficient
 function EigenvaluesDensity_sub(pre_quench, post_quench, style, L_sub, N_cells, t; filling_fraction=1.0)
     ρ_sub = DensityMatrix_subsystem(pre_quench, post_quench, style, L_sub, N_cells, t; filling_fraction=filling_fraction)
-    # Ensure Hermitian wrapper to use specialized LAPACK
     return eigvals(Hermitian(ρ_sub))
 end
 
