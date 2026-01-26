@@ -1,7 +1,7 @@
-function SingleVariance(pre_quench, post_quench, style, L_cells, N_cells, cut, t)
-    ρ = DensityMatrix(pre_quench, post_quench, style, L_cells, N_cells, cut, t)
-    C_A = ρ + 0.5 .* I  # recover correlation matrix
-    return real(tr(C_A * (I - C_A)))  # variance formula
+function SingleVariance(pre_quench, post_quench, style, L_cells, N_cells, cut, t; filling_fraction=1.0)
+    eigs = EigenvaluesDensity(pre_quench, post_quench, style, L_cells, N_cells, cut, t; filling_fraction=filling_fraction) 
+    eigs = eigs[(eigs .> 1e-14) .& (eigs .< 1 - 1e-14)] 
+    return sum(eigs .*(1 .- eigs))  # variance formula
 end
 
 function GenerateDataVarianceEquilibrium(pre_quench, style, N_cells; max_LA = nothing)

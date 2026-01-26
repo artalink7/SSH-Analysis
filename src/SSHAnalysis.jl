@@ -1,5 +1,4 @@
 module SSHAnalysis
-
 using LinearAlgebra
 using QuadGK
 using DelimitedFiles
@@ -13,7 +12,8 @@ using DelimitedFiles
 export GenerateDataEntropy, GenerateDataEntropyEquilibrium, 
        GenerateDataVarianceEquilibrium, GenerateDataVariance,  
        SaveWithTimeStamp, ProjectRoot, RealSpaceDensityM,
-       @showprogress
+       @showprogress, EntanglementEntropy, SingleVariance,
+       EntropyandVariance_sub
 
 include("BlochVectors.jl")
 include("DensityMatrix.jl")
