@@ -2,6 +2,11 @@
 /plot/*.pdf
 /plot/*.svg
 /plot/*.png
+/plot/**/*.pdf
+/plot/**/*.svg
+/plot/**/*.png
+# Ignore all figure files in any directory
+*.fig
 *.svg
 *.pdf
 *.png
