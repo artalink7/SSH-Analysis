@@ -24,12 +24,12 @@ __pycache__/
 
 # Ignore Julia compiled files and packages
 .julia/
-Manifest.toml
-Project.toml
+#Manifest.toml
+#Project.toml
 
 # Ignore VS Code settings
 .vscode/
 
 # Mac system files
 .DS_Store
-SSHvenv/
+.venv/

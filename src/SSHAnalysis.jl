@@ -7,7 +7,6 @@ using LaTeXStrings
 using ProgressMeter
 using Base.Threads
 using Dates
-using DelimitedFiles
 
 export GenerateDataEntropy, GenerateDataEntropyEquilibrium, 
        GenerateDataVarianceEquilibrium, GenerateDataVariance,  
