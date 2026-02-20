@@ -14,5 +14,5 @@ entropy = GenerateDataEntropy(pre_quench, post_quench, style, L_cells, N_cells)
 
 # Save Data
 data_dir = joinpath(ProjectRoot(), "data", "quench")
-SaveWithTimeStamp(entropy, data_dir, "entropy_40_cells_noflux")
+SaveWithTimeStamp(entropy, data_dir, "entropy_40_cells_noflux_1")
 
