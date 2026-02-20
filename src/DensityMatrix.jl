@@ -78,12 +78,14 @@ function RealSpaceDensityM(pre_quench, post_quench, r, style, N_cells, t; fillin
             ρ_00 = quadgk(integrand(("00", "Real")), -π, π)[1] / (2π) + im * quadgk(integrand(("00", "Imag")), -π, π)[1] / (2π)
             ρ_01 = quadgk(integrand(("01", "Real")), -π, π)[1] / (2π) + im * quadgk(integrand(("01", "Imag")), -π, π)[1] / (2π)
             ρ_10 = quadgk(integrand(("10", "Real")), -π, π)[1] / (2π) + im * quadgk(integrand(("10", "Imag")), -π, π)[1] / (2π)
+            ρ_11 = quadgk(integrand(("11", "Real")), -π, π)[1] / (2π) + im * quadgk(integrand(("11", "Imag")), -π, π)[1] / (2π)
         else
             ρ_00 = quadgk(integrand(("00", "Real")), -π, π)[1] / (2π) 
             real_01 = quadgk(integrand(("01", "Real")), -π, π)[1] / (2π)
             imag_01 = quadgk(integrand(("01", "Imag")), -π, π)[1] / (2π)
             ρ_01 = real_01 + im * imag_01
             ρ_10 = real_01 - im * imag_01
+            ρ_11 = quadgk(integrand(("11", "Real")), -π, π)[1] / (2π)
         end
     elseif style == "discrete"
         k_vals = 2π * (0:N_cells-1) ./ N_cells

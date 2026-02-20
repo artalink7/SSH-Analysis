@@ -29,7 +29,7 @@ function GenerateDataEntropyEquilibrium(pre_quench, style, N_cells; max_LA = not
     
     Threads.@threads for i in eachindex(LA_range)
         LA = LA_range[i]
-        Val1 = EigenvaluesDensity(pre_quench, [0, 1, 1, 0], style, LA, N_cells, "1", 0.0) .+ 0.5
+        Val1 = EigenvaluesDensity_sub(pre_quench, [0, 1, 1, 0], style, LA, N_cells, 0.0) 
         V_s = filter(x -> (x > 0 && x < 1.0), Val1)
         entropy_equilibrium[i] = -sum((1 .- V_s) .* log.(1 .- V_s) .+ V_s .*log.(V_s)) 
     end

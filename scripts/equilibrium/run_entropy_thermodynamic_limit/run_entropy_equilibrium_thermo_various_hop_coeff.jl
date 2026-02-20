@@ -4,7 +4,7 @@ using SSHAnalysis
 # Define parameters
 style = "continuos"
 N_cells = 1
-w = 0.400:0.01:2.000
+w = 0.000:0.01:4.000
 
 # Generate Data
 entropy = zeros(length(w))
