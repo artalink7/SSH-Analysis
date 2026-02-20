@@ -16,6 +16,7 @@ data/**/*.txt
 data/**/*.csv
 *.csv
 *.txt
+*.dat
 
 # Ignore Python/Jupyter artifacts
 __pycache__/
