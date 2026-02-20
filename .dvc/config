@@ -1,0 +1,4 @@
+[core]
+    remote = mybackup
+['remote "mybackup"']
+    url = /home/giuliano-artale/dvc_backups/ssh_analysis/
