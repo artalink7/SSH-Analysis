@@ -12,7 +12,7 @@ export GenerateDataEntropy, GenerateDataEntropyEquilibrium,
        GenerateDataVarianceEquilibrium, GenerateDataVariance,  
        SaveWithTimeStamp, ProjectRoot, RealSpaceDensityM,
        @showprogress, EntanglementEntropy, SingleVariance,
-       EntropyandVariance_sub
+       EntropyandVariance_sub, EigenvaluesDensity_sub
 
 include("BlochVectors.jl")
 include("DensityMatrix.jl")
