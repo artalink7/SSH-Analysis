@@ -14,5 +14,5 @@ variance = GenerateDataVariance(pre_quench, post_quench, style, L_cells, N_cells
 
 # Save Data
 data_dir = joinpath(ProjectRoot(), "data", "quench")
-SaveWithTimeStamp(variance, data_dir, "variance_40_cells_noflux")
+SaveWithTimeStamp(variance, data_dir, "variance_40_cells_noflux_1")
 

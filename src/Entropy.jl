@@ -9,7 +9,7 @@ function GenerateDataEntropy(pre_quench, post_quench, style, L_cells, N_cells)
     entropy = zeros(length(time))
     
     for (i, t) in enumerate(time)
-        Val1 = EigenvaluesDensity(pre_quench, post_quench, style, L_cells, N_cells, "1", t) .+ 0.5
+        Val1 = EigenvaluesDensity_sub(pre_quench, post_quench, style, L_cells, N_cells, t) 
         V_s = filter(x -> (x > 0 && x < 1.0), Val1)
         entropy[i] = -sum((1 .- V_s) .* log.(1 .- V_s) .+ V_s .*log.(V_s)) 
     end
@@ -37,8 +37,8 @@ function GenerateDataEntropyEquilibrium(pre_quench, style, N_cells; max_LA = not
 end
 
 # --- Entanglement entropy from density matrix eigenvalues ---
-function EntanglementEntropy(pre_quench, post_quench, style, L_cells, N_cells, cut, t; filling_fraction=1.0)
-    eigs = EigenvaluesDensity(pre_quench, post_quench, style, L_cells, N_cells, cut, t; filling_fraction=filling_fraction) 
+function EntanglementEntropy(pre_quench, post_quench, style, L_cells, N_cells, t; filling_fraction=1.0)
+    eigs = EigenvaluesDensity_sub(pre_quench, post_quench, style, L_cells, N_cells, t; filling_fraction=filling_fraction) 
 
     eigs = eigs[(eigs .> 1e-14) .& (eigs .< 1 - 1e-14)]
 
