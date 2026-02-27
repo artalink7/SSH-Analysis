@@ -24,8 +24,8 @@ function build_SSH_MPO_PBC(sites; v=1.0, w=1.0, Δ=0.0, V=0.0)
     bond_type = (N % 2 == 0) ? w : v
     # Fermionic PBC requires careful handling of the boundary sign depending on particle number,
     # but ITensor handles the Jordan-Wigner strings automatically for OpSums.
-    os += -bond_type, "Cdag", N, "C", 1
-    os += -bond_type, "Cdag", 1, "C", N
+    os += bond_type, "Cdag", N, "C", 1
+    os += bond_type, "Cdag", 1, "C", N
 
     # Staggered Potential (Keep 0 for criticality)
     if Δ != 0.0
@@ -100,7 +100,7 @@ function scan_fluctuations_PBC()
     st0 = product_state_Nf(N, Nf0)
     
     # Open CSV for writing
-    open("fluctuations_PBC_vs_ell.csv", "w") do file 
+    open("fluctuations_PBC_vs_ell_full.csv", "w") do file 
         write(file, "V,ell,Fluctuation\n")
         
         for V in V_values
