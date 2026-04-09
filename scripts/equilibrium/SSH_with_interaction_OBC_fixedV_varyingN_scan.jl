@@ -50,7 +50,7 @@ function scan_charge_gap_vs_N_fixed()
             sites = siteinds("Fermion", N; conserve_qns=true)
             st0, stp, stm = create_CDW_states(N)
 
-            H = buil_SSH_MPO_OBC(sites; v=v_fixed, w=w_fixed, Δ=Δ_fixed, V=V_fixed)
+            H = build_SSH_MPO_OBC(sites; v=v_fixed, w=w_fixed, Δ=Δ_fixed, V=V_fixed)
             
             E0 = run_dmrg_cdw(H, sites, st0)
             Ep = run_dmrg_cdw(H, sites, stp)
