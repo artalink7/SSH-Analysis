@@ -9,12 +9,12 @@ data_dir = joinpath(ProjectRoot(), "data", "quench")
 pre_quench  = (φ=0, w=0.7, v=1, V=0.0)
 post_quench = (φ=0, w=1, v=0.7, V=0.0)
 style = "discrete"
-L_cells = 200
-N_cells = 400
+L_cells = 40
+N_cells = 80
 
 # Generate Data
 
-open(data_dir * "/run_quench_gapped_to_gapped_SSH_400cells_200sec.csv", "w") do file 
+open(data_dir * "/run_quench_gapped_to_gapped_SSH_80cells_200sec.csv", "w") do file 
     write(file , "Time,Entropy,Variance\n")
     time = 0:0.4:199.6
     for t in time
