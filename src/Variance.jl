@@ -1,5 +1,5 @@
-function SingleVariance(pre_quench, post_quench, style, L_cells, N_cells, cut, t; filling_fraction=1.0)
-    eigs = EigenvaluesDensity(pre_quench, post_quench, style, L_cells, N_cells, cut, t; filling_fraction=filling_fraction) 
+function SingleVariance(pre_quench, post_quench, style, L_cells, N_cells, t; filling_fraction=1.0)
+    eigs = EigenvaluesDensity_sub(pre_quench, post_quench, style, L_cells, N_cells, t; filling_fraction=filling_fraction) 
     eigs = eigs[(eigs .> 1e-14) .& (eigs .< 1 - 1e-14)] 
     return sum(eigs .*(1 .- eigs))  # variance formula
 end
@@ -14,7 +14,7 @@ function GenerateDataVarianceEquilibrium(pre_quench, style, N_cells; max_LA = no
 
     Threads.@threads for i in eachindex(LA_range)
         LA = LA_range[i]
-        variances_equilibrium[i] = SingleVariance(pre_quench, [0,1,1,0], style, LA, N_cells, "1", 0.0)
+        variances_equilibrium[i] = SingleVariance(pre_quench, [0,1,1,0], style, LA, N_cells, 0.0)
     end
     return variances_equilibrium
 end
@@ -25,7 +25,7 @@ function GenerateDataVariance(pre_quench, post_quench, style, L_cells, N_cells)
     variance_quench = zeros(nsteps)
 
     @showprogress 1 for (i, t) in enumerate(time)
-        variance_quench[i] = SingleVariance(pre_quench, post_quench, style, L_cells, N_cells, "1", t)
+        variance_quench[i] = SingleVariance(pre_quench, post_quench, style, L_cells, N_cells, t)
     end
     return variance_quench
 end
