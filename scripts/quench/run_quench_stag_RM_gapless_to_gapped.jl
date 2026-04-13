@@ -7,7 +7,7 @@ data_dir = joinpath(ProjectRoot(), "data", "quench")
 
 # Define parameters
 
-pre_quench  = (φ=0, w=1, v=1, V=0.5)
+pre_quench  = (φ=0, w=1, v=1, V=0)
 post_quench = (φ=0, w=1, v=1, V=4.0)
 style = "discrete"
 L_cells = 40

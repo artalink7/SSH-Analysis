@@ -11,7 +11,7 @@ pre_quench  = (φ=0, w=1.0, v=1, V=0.0)
 post_quench = (φ=0, w=1.0, v=0.5, V=0.0)
 style = "discrete"
 L_cells = 40
-N_cells = 80       
+N_cells = 80      
 
 # Generate Data
 open(data_dir * "/run_quench_gapless_to_gapped_SSH_80cells_1000sec.csv", "w") do file 
