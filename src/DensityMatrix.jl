@@ -25,8 +25,11 @@ function CorrelationMomentumSpace(pre_quench, post_quench, corr, r, k, t; occ_k=
     # t: time
     correlation, tipo = corr 
     ρ_k = exp(-im * k * r) * QuenchedDensityMatrix(pre_quench, post_quench, k, t) * occ_k
-    ρ_flat = vec(ρ_k)
-    ρ_00, ρ_01, ρ_10, ρ_11 = ρ_flat
+    
+    ρ_00 = ρ_k[1, 1]
+    ρ_01 = ρ_k[1, 2]
+    ρ_10 = ρ_k[2, 1]
+    ρ_11 = ρ_k[2, 2]
 
     if correlation == "00"
         return tipo == "Real" ? real(ρ_00) : imag(ρ_00)
@@ -162,3 +165,86 @@ function EntropyandVariance_sub(pre_quench, post_quench, style, L_sub, N_cells, 
     V = sum(eigs .* (1 .- eigs))
     return S, V
 end
+
+function SubsystemHamiltonian(params, L_sub)
+    φ, w, v, V = params
+    twoL = 2 * L_sub
+    H_sub = zeros(ComplexF64, twoL, twoL)
+
+    for m in 1:L_sub 
+        #site indices in the matrix 
+        idx_A = 2m -1 
+        idx_B = 2m
+
+        #On-site potential
+        H_sub[idx_A, idx_A] = V
+        H_sub[idx_B, idx_B] = -V
+
+        #Intracell hopping
+        H_sub[idx_A, idx_B] = v * exp(im * φ)
+        H_sub[idx_B, idx_A] = v * exp(-im * φ)
+
+        #Intercell hopping (except for the last cell)
+        if m < L_sub
+            idx_A_next = 2*m + 1
+            H_sub[idx_B, idx_A_next] = w
+            H_sub[idx_A_next, idx_B] = w
+        end
+    end
+    return Hermitian(H_sub)
+end 
+
+function ExpectationValue_HamiltonianSub(pre_quench, post_quench, style, L_sub, N_cells, t; filling_fraction=1.0)
+    ρ_sub = DensityMatrix_subsystem(pre_quench, post_quench, style, L_sub, N_cells, t; filling_fraction=filling_fraction)
+    H_sub = SubsystemHamiltonian(post_quench, L_sub)
+    return real(tr(ρ_sub * H_sub))
+end
+
+function EnergyFluctuationsEntropy(pre_quench, post_quench, style, L_sub, N_cells, t; filling_fraction=1.0)
+    ρ_sub = DensityMatrix_subsystem(pre_quench, post_quench, style, L_sub, N_cells, t; filling_fraction=filling_fraction)
+    H_sub = SubsystemHamiltonian(post_quench, L_sub)
+    eigs = eigvals(Hermitian(ρ_sub))
+    eigs = eigs[(eigs .> 1e-14) .& (eigs .< 1 - 1e-14)]
+    S = -sum(eigs .* log.(eigs) .+ (1 .- eigs) .* log.(1 .- eigs))
+    V = sum(eigs .* (1 .- eigs))
+    E_exp = real(tr(ρ_sub * H_sub))
+    return S, V, E_exp
+end
+
+function CorrelationMatrixOBC(params, N_cells, L_cell, start_sub; filling_fraction = 0.5)
+    # 1. Full Hamiltonian for OBC
+    H_full = SubsystemHamiltonian(params, N_cells)
+    
+    # 2. Eigenvectors
+    decomp = eigen(H_full)
+    wavefunctions = decomp.vectors
+
+    # 3. Occupation based on filling fraction
+    total_sites = 2 * N_cells
+    M = clamp(round(Int, filling_fraction * total_sites), 0, total_sites)
+
+    # 4. Construct correlation matrix
+    occupied_states = wavefunctions[:, 1:M]  # take M lowest energy states
+    ρ_full = occupied_states * occupied_states'  # correlation matrix in full space
+
+    # 5. Extract subsystem correlation matrix
+    start_ix = 2 * start_sub - 1
+    end_ix = start_ix + 2 * L_cell - 1
+    ρ_sub = ρ_full[start_ix:end_ix, start_ix:end_ix]
+
+    return ρ_sub
+end
+
+# function QuenchOBC(ρ_obc, post_quench, dt, T)
+#     #1. Build subsystem Hamiltonian for the post-quench parameters
+#     H_post = SubsystemHamiltonian(post_quench, size(ρ_obc, 1) ÷ 2)
+#     decomp = eigen(H_post)
+#     E_post = decomp.values
+#     ψ_post = decomp.vectors
+
+#     #2. Rotate the initial density matrix into the post-quench eigenbasis
+#     ρ_rot = ψ_post' * ρ_obc * ψ_post
+
+#     #3. Time evolve in the post-quench eigenbasis
+#     times = 0:dt:T
+#     num_states
