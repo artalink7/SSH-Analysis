@@ -12,6 +12,8 @@ using ITensors
 using ITensorMPS
 using ITensorGaussianMPS
 using Statistics
+using DataFrames
+using CSV
 
 export GenerateDataEntropy, GenerateDataEntropyEquilibrium, 
        GenerateDataVarianceEquilibrium, GenerateDataVariance,  
@@ -20,7 +22,8 @@ export GenerateDataEntropy, GenerateDataEntropyEquilibrium,
        EntropyandVariance_sub, EigenvaluesDensity_sub, @printf,
        siteinds, product_state_Nf, build_SSH_MPO_OBC, build_SSH_MPO_PBC,
        ground_energy, correlation_matrix, measure_observables, expect,
-       randomMPS, create_CDW_states, run_dmrg_cdw
+       randomMPS, create_CDW_states, run_dmrg_cdw, simulate_quench, DataFrame, CSV,
+       ExpectationValue_HamiltonianSub, EnergyFluctuationsEntropy
 
 include("BlochVectors.jl")
 include("DensityMatrix.jl")
