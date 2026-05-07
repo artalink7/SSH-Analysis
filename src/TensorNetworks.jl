@@ -17,46 +17,39 @@ function build_SSH_MPO_OBC(sites; v=1.0, w=0.5, Δ=0.0, V=0.0)
 
     # Nearest-neighbor interaction
     if V != 0.0
-        for i in 1:N-1; os += V, "N", i, "N", i+1; end
+        for i in 1:N-1
+            os += V, "N", i, "N", i+1
+            os += -V/2.0, "N", i
+            os += -V/2.0, "N", i+1
+        end
     end
 
     return MPO(os, sites)
 end
 
-function measure_observables(psi, N, La_width)
-    # Guarantee exactly La_width sites, perfectly centered in the chain
-    start_site = (N - La_width) ÷ 2 + 1
-    end_site   = start_site + La_width - 1
-    subsystem_inds = start_site:end_site
+function measure_observables(psi, N)
+    La_width = N ÷ 2
+    subsystem_inds = 1:La_width
 
-    # Entanglement Entropy
-    center = N ÷ 2
-    orthogonalize!(psi, center) 
-    row_inds = uniqueinds(psi[center], psi[center+1])
-    U, S_vals, V_mat = svd(psi[center], row_inds)
+    # 1. Entanglement Entropy
+    orthogonalize!(psi, La_width) 
+    row_inds = uniqueinds(psi[La_width], psi[La_width+1])
+    U, S_vals, V_mat = svd(psi[La_width], row_inds)
+
     S_EE = 0.0
     for λ in diag(S_vals)
         p = λ^2
-        if p > 1e-12; S_EE -= p * log(p); end
+        if p > 1e-12 
+            S_EE -= p * log(p) 
+        end
     end
     S_EE = real(S_EE) 
 
-    # Particle Number Fluctuations
-    NM = correlation_matrix(psi, "N", "N"; sites=subsystem_inds)
-    N_A_mean = 0.0
-    N_A_sq_mean = 0.0
-    
-    # SAFER LOOP: dynamically use the exact size of the generated matrix
-    actual_size = size(NM, 1)
-    for i in 1:actual_size
-        for j in 1:actual_size
-            N_A_sq_mean += NM[i, j]
-        end
-        N_A_mean += NM[i, i]
-    end
-    
-    F = N_A_sq_mean - (N_A_mean)^2
-    F = real(F)
+    # 2. Particle Number Fluctuations
+    NM = correlation_matrix(psi, "N", "N", sites=subsystem_inds)
+    N_A_mean = tr(NM)
+    N_A_sq_mean = sum(NM)
+    F = real(N_A_sq_mean - (N_A_mean^2))    
 
     return S_EE, F
 end
@@ -178,13 +171,14 @@ function simulate_quench(N_sites, T_max, dt; v_i=1.0, w_i=0.5, V_i=1.0, v_f=1.0,
     println("Starting time evolution...")
     for t in times
         # Measure observables before applying the time step
-        S_EE, F = measure_observables(psi, N_sites, La_width)
+        S_EE, F = measure_observables(psi, N_sites)
         push!(S_EE_vals, S_EE)
         push!(F_vals, F)
         
         # Apply the Trotter gates to evolve the state by dt
         # 'cutoff' and 'maxdim' are critical here to manage entanglement growth
         psi = apply(gates, psi; cutoff=1e-10, maxdim=800)
+        normalize!(psi) # Normalize after each full Trotter step
         println("Time: ", round(t, digits=3), " | S_EE: ", round(S_EE, digits=4), " | F: ", round(F, digits=4))
     end
     

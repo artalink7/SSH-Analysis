@@ -166,39 +166,39 @@ function EntropyandVariance_sub(pre_quench, post_quench, style, L_sub, N_cells, 
     return S, V
 end
 
-function SubsystemHamiltonian(params, L_sub)
-    φ, w, v, V = params
-    twoL = 2 * L_sub
-    H_sub = zeros(ComplexF64, twoL, twoL)
+# function SubsystemHamiltonian(params, L_sub)
+#     φ, w, v, V = params
+#     twoL = 2 * L_sub
+#     H_sub = zeros(ComplexF64, twoL, twoL)
 
-    for m in 1:L_sub 
-        #site indices in the matrix 
-        idx_A = 2m -1 
-        idx_B = 2m
+#     for m in 1:L_sub 
+#         #site indices in the matrix 
+#         idx_A = 2m -1 
+#         idx_B = 2m
 
-        #On-site potential
-        H_sub[idx_A, idx_A] = V
-        H_sub[idx_B, idx_B] = -V
+#         #On-site potential
+#         H_sub[idx_A, idx_A] = V
+#         H_sub[idx_B, idx_B] = -V
 
-        #Intracell hopping
-        H_sub[idx_A, idx_B] = v * exp(im * φ)
-        H_sub[idx_B, idx_A] = v * exp(-im * φ)
+#         #Intracell hopping
+#         H_sub[idx_A, idx_B] = v * exp(im * φ)
+#         H_sub[idx_B, idx_A] = v * exp(-im * φ)
 
-        #Intercell hopping (except for the last cell)
-        if m < L_sub
-            idx_A_next = 2*m + 1
-            H_sub[idx_B, idx_A_next] = w
-            H_sub[idx_A_next, idx_B] = w
-        end
-    end
-    return Hermitian(H_sub)
-end 
+#         #Intercell hopping (except for the last cell)
+#         if m < L_sub
+#             idx_A_next = 2*m + 1
+#             H_sub[idx_B, idx_A_next] = w
+#             H_sub[idx_A_next, idx_B] = w
+#         end
+#     end
+#     return Hermitian(H_sub)
+# end 
 
-function ExpectationValue_HamiltonianSub(pre_quench, post_quench, style, L_sub, N_cells, t; filling_fraction=1.0)
-    ρ_sub = DensityMatrix_subsystem(pre_quench, post_quench, style, L_sub, N_cells, t; filling_fraction=filling_fraction)
-    H_sub = SubsystemHamiltonian(post_quench, L_sub)
-    return real(tr(ρ_sub * H_sub))
-end
+# function ExpectationValue_HamiltonianSub(pre_quench, post_quench, style, L_sub, N_cells, t; filling_fraction=1.0)
+#     ρ_sub = DensityMatrix_subsystem(pre_quench, post_quench, style, L_sub, N_cells, t; filling_fraction=filling_fraction)
+#     H_sub = SubsystemHamiltonian(post_quench, L_sub)
+#     return real(tr(ρ_sub * H_sub))
+# end
 
 function EnergyFluctuationsEntropy(pre_quench, post_quench, style, L_sub, N_cells, t; filling_fraction=1.0)
     ρ_sub = DensityMatrix_subsystem(pre_quench, post_quench, style, L_sub, N_cells, t; filling_fraction=filling_fraction)

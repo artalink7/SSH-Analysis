@@ -22,6 +22,7 @@ function BlochPre(k, φ_i, w_i, v_i, V_i)
     E_plus = sqrt(h_x^2 + h_y^2 + h_z^2)
     return [h_x, h_y, h_z] ./ E_plus
 end
+    
 
 # --- Normalized Bloch vector after quench ---
 function BlochPost(k, φ_f, w_f, v_f, V_f)
