@@ -21,7 +21,7 @@ times, entropies, variances = simulate_quench(N_sites, T_max, dt; v_i=v_i, w_i=w
 
 # Save the data to a CSV file
 df = DataFrame(Time=times, Entropy=entropies, Variance=variances)
-filename = "run_TB_quench_interacting_gapped_to_non_interacting_gapless_200sites_10sec.csv"
+filename = "run_TB_quench_interacting_gapped_to_non_interacting_gapless_200sites_10sec_BondDim1000.csv"
 CSV.write(data_dir * "/$filename", df)
 
 println("Quench simulation completed and data saved to $data_dir/$filename")

@@ -177,7 +177,7 @@ function simulate_quench(N_sites, T_max, dt; v_i=1.0, w_i=0.5, V_i=1.0, v_f=1.0,
         
         # Apply the Trotter gates to evolve the state by dt
         # 'cutoff' and 'maxdim' are critical here to manage entanglement growth
-        psi = apply(gates, psi; cutoff=1e-10, maxdim=800)
+        psi = apply(gates, psi; cutoff=1e-10, maxdim=1000)
         normalize!(psi) # Normalize after each full Trotter step
         println("Time: ", round(t, digits=3), " | S_EE: ", round(S_EE, digits=4), " | F: ", round(F, digits=4))
     end
