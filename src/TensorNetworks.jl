@@ -28,7 +28,7 @@ function build_SSH_MPO_OBC(sites; v=1.0, w=0.5, Δ=0.0, V=0.0)
 end
 
 function measure_observables(psi, N, V)
-    La_width = N ÷ 2
+    La_width::Int = N ÷ 2
     subsystem_inds = 1:La_width
 
     # 1. Entanglement Entropy
