@@ -1,0 +1,109 @@
+============================================================
+Quench simulation started: 2026-07-02T10:47:17.089
+N_sites = 200, T_max = 10.0, dt = 0.05, bond_dim = 1500
+Pre-quench parameters: v=1.0, w=1.0, Δ=0.0, V=4.0
+Post-quench parameters: v=1.0, w=1.0, Δ=0.0, V=1.0
+============================================================
+Preparing interacting ground state (t < 0)...
+Initial Ground State Energy: -445.09009897799206 (DMRG took 60.12 seconds)
+Initial max bond dimension: 34
+Constructing TEBD gates for quench...
+Starting time evolution...
+t = 0.0, S_EE = 0.2816, F = 0.0629, χ = 30 / 1500, step_time = 14.9497 s, elapsed_time = 18.8957 s, estimated_remaining_time = 3779.14 s
+t = 0.05, S_EE = 0.2846, F = 0.064, χ = 29 / 1500, step_time = 0.444 s, elapsed_time = 23.9762 s, estimated_remaining_time = 2385.6319 s
+t = 0.1, S_EE = 0.2936, F = 0.0672, χ = 29 / 1500, step_time = 0.4567 s, elapsed_time = 24.7876 s, estimated_remaining_time = 1635.9816 s
+t = 0.15, S_EE = 0.3078, F = 0.0724, χ = 29 / 1500, step_time = 0.4146 s, elapsed_time = 25.536 s, estimated_remaining_time = 1257.648 s
+t = 0.2, S_EE = 0.3261, F = 0.0793, χ = 29 / 1500, step_time = 0.428 s, elapsed_time = 26.309 s, estimated_remaining_time = 1031.3128 s
+t = 0.25, S_EE = 0.3475, F = 0.0877, χ = 29 / 1500, step_time = 0.4172 s, elapsed_time = 27.0716 s, estimated_remaining_time = 879.827 s
+t = 0.3, S_EE = 0.3708, F = 0.0971, χ = 29 / 1500, step_time = 0.4326 s, elapsed_time = 27.8647 s, estimated_remaining_time = 772.2503 s
+t = 0.35, S_EE = 0.3954, F = 0.1073, χ = 30 / 1500, step_time = 0.436 s, elapsed_time = 28.6474 s, estimated_remaining_time = 691.1185 s
+t = 0.4, S_EE = 0.4207, F = 0.1178, χ = 31 / 1500, step_time = 0.4428 s, elapsed_time = 29.4381 s, estimated_remaining_time = 628.0128 s
+t = 0.45, S_EE = 0.4464, F = 0.1283, χ = 31 / 1500, step_time = 0.4455 s, elapsed_time = 30.2475 s, estimated_remaining_time = 577.7272 s
+t = 0.5, S_EE = 0.4725, F = 0.1387, χ = 31 / 1500, step_time = 0.8825 s, elapsed_time = 31.4949 s, estimated_remaining_time = 544.0028 s
+t = 0.55, S_EE = 0.4991, F = 0.1486, χ = 32 / 1500, step_time = 0.482 s, elapsed_time = 32.3531 s, estimated_remaining_time = 509.5613 s
+t = 0.6, S_EE = 0.5262, F = 0.1579, χ = 33 / 1500, step_time = 0.4451 s, elapsed_time = 33.1495 s, estimated_remaining_time = 479.3928 s
+t = 0.65, S_EE = 0.5539, F = 0.1666, χ = 33 / 1500, step_time = 0.4641 s, elapsed_time = 33.9743 s, estimated_remaining_time = 453.7996 s
+t = 0.7, S_EE = 0.5822, F = 0.1746, χ = 34 / 1500, step_time = 0.4814 s, elapsed_time = 34.8243 s, estimated_remaining_time = 431.8213 s
+t = 0.75, S_EE = 0.6111, F = 0.1821, χ = 35 / 1500, step_time = 0.506 s, elapsed_time = 35.7239 s, estimated_remaining_time = 413.0576 s
+t = 0.8, S_EE = 0.6406, F = 0.189, χ = 35 / 1500, step_time = 0.5067 s, elapsed_time = 36.6328 s, estimated_remaining_time = 396.4962 s
+t = 0.85, S_EE = 0.6707, F = 0.1954, χ = 36 / 1500, step_time = 0.4964 s, elapsed_time = 37.5363 s, estimated_remaining_time = 381.619 s
+t = 0.9, S_EE = 0.7013, F = 0.2015, χ = 37 / 1500, step_time = 0.5095 s, elapsed_time = 38.4572 s, estimated_remaining_time = 368.3795 s
+t = 0.95, S_EE = 0.7323, F = 0.2074, χ = 39 / 1500, step_time = 0.505 s, elapsed_time = 39.3993 s, estimated_remaining_time = 356.5637 s
+t = 1.0, S_EE = 0.7637, F = 0.2132, χ = 40 / 1500, step_time = 0.5381 s, elapsed_time = 40.3931 s, estimated_remaining_time = 346.2266 s
+t = 1.05, S_EE = 0.7952, F = 0.2188, χ = 42 / 1500, step_time = 0.5464 s, elapsed_time = 41.4167 s, estimated_remaining_time = 336.9813 s
+t = 1.1, S_EE = 0.8268, F = 0.2245, χ = 43 / 1500, step_time = 1.0213 s, elapsed_time = 42.9213 s, estimated_remaining_time = 332.1735 s
+t = 1.15, S_EE = 0.8585, F = 0.2302, χ = 45 / 1500, step_time = 0.5459 s, elapsed_time = 43.9302 s, estimated_remaining_time = 323.9852 s
+t = 1.2, S_EE = 0.8901, F = 0.2359, χ = 46 / 1500, step_time = 0.5719 s, elapsed_time = 44.9571 s, estimated_remaining_time = 316.498 s
+t = 1.25, S_EE = 0.9216, F = 0.2417, χ = 48 / 1500, step_time = 0.5914 s, elapsed_time = 46.0533 s, estimated_remaining_time = 309.9741 s
+t = 1.3, S_EE = 0.953, F = 0.2475, χ = 49 / 1500, step_time = 0.6018 s, elapsed_time = 47.1752 s, estimated_remaining_time = 304.018 s
+t = 1.35, S_EE = 0.9844, F = 0.2534, χ = 51 / 1500, step_time = 0.6247 s, elapsed_time = 48.3511 s, estimated_remaining_time = 298.7407 s
+t = 1.4, S_EE = 1.0156, F = 0.2594, χ = 53 / 1500, step_time = 0.6403 s, elapsed_time = 49.5288 s, estimated_remaining_time = 293.757 s
+t = 1.45, S_EE = 1.0468, F = 0.2654, χ = 56 / 1500, step_time = 0.7015 s, elapsed_time = 50.7885 s, estimated_remaining_time = 289.4944 s
+t = 1.5, S_EE = 1.0781, F = 0.2714, χ = 59 / 1500, step_time = 0.6849 s, elapsed_time = 52.6378 s, estimated_remaining_time = 288.6589 s
+t = 1.55, S_EE = 1.1093, F = 0.2774, χ = 61 / 1500, step_time = 0.7503 s, elapsed_time = 53.9338 s, estimated_remaining_time = 284.8379 s
+t = 1.6, S_EE = 1.1405, F = 0.2835, χ = 62 / 1500, step_time = 0.7782 s, elapsed_time = 55.4091 s, estimated_remaining_time = 282.0827 s
+t = 1.65, S_EE = 1.1718, F = 0.2896, χ = 65 / 1500, step_time = 0.8072 s, elapsed_time = 56.8968 s, estimated_remaining_time = 279.4637 s
+t = 1.7, S_EE = 1.2032, F = 0.2956, χ = 68 / 1500, step_time = 0.8554 s, elapsed_time = 58.4942 s, estimated_remaining_time = 277.4296 s
+t = 1.75, S_EE = 1.2346, F = 0.3017, χ = 71 / 1500, step_time = 0.8199 s, elapsed_time = 60.4066 s, estimated_remaining_time = 276.8636 s
+t = 1.8, S_EE = 1.2661, F = 0.3077, χ = 74 / 1500, step_time = 0.9193 s, elapsed_time = 62.1119 s, estimated_remaining_time = 275.3068 s
+t = 1.85, S_EE = 1.2976, F = 0.3137, χ = 76 / 1500, step_time = 0.9394 s, elapsed_time = 63.9286 s, estimated_remaining_time = 274.22 s
+t = 1.9, S_EE = 1.3291, F = 0.3197, χ = 80 / 1500, step_time = 1.3828 s, elapsed_time = 66.2007 s, estimated_remaining_time = 274.9875 s
+t = 1.95, S_EE = 1.3607, F = 0.3256, χ = 83 / 1500, step_time = 1.1887 s, elapsed_time = 68.1939 s, estimated_remaining_time = 274.4804 s
+t = 2.0, S_EE = 1.3923, F = 0.3316, χ = 85 / 1500, step_time = 1.1403 s, elapsed_time = 70.3194 s, estimated_remaining_time = 274.4172 s
+t = 2.05, S_EE = 1.4239, F = 0.3375, χ = 89 / 1500, step_time = 1.5115 s, elapsed_time = 72.8578 s, estimated_remaining_time = 275.8188 s
+t = 2.1, S_EE = 1.4555, F = 0.3434, χ = 93 / 1500, step_time = 1.1865 s, elapsed_time = 75.0774 s, estimated_remaining_time = 275.8658 s
+t = 2.15, S_EE = 1.4871, F = 0.3493, χ = 97 / 1500, step_time = 1.5934 s, elapsed_time = 77.7901 s, estimated_remaining_time = 277.5692 s
+t = 2.2, S_EE = 1.5187, F = 0.3552, χ = 100 / 1500, step_time = 1.2992 s, elapsed_time = 80.1677 s, estimated_remaining_time = 277.9147 s
+t = 2.25, S_EE = 1.5503, F = 0.361, χ = 104 / 1500, step_time = 1.6564 s, elapsed_time = 83.0711 s, estimated_remaining_time = 279.9135 s
+t = 2.3, S_EE = 1.5819, F = 0.3669, χ = 109 / 1500, step_time = 1.4021 s, elapsed_time = 85.7281 s, estimated_remaining_time = 280.8963 s
+t = 2.35, S_EE = 1.6134, F = 0.3728, χ = 113 / 1500, step_time = 1.5001 s, elapsed_time = 88.8551 s, estimated_remaining_time = 283.2256 s
+t = 2.4, S_EE = 1.645, F = 0.3786, χ = 118 / 1500, step_time = 1.8432 s, elapsed_time = 92.1553 s, estimated_remaining_time = 285.8695 s
+t = 2.45, S_EE = 1.6765, F = 0.3845, χ = 123 / 1500, step_time = 2.2473 s, elapsed_time = 95.9115 s, estimated_remaining_time = 289.6527 s
+t = 2.5, S_EE = 1.708, F = 0.3903, χ = 128 / 1500, step_time = 2.1702 s, elapsed_time = 99.5952 s, estimated_remaining_time = 292.9271 s
+t = 2.55, S_EE = 1.7395, F = 0.3962, χ = 133 / 1500, step_time = 2.5201 s, elapsed_time = 104.076 s, estimated_remaining_time = 298.2178 s
+t = 2.6, S_EE = 1.771, F = 0.402, χ = 138 / 1500, step_time = 2.7176 s, elapsed_time = 108.6741 s, estimated_remaining_time = 303.4673 s
+t = 2.65, S_EE = 1.8025, F = 0.4079, χ = 144 / 1500, step_time = 2.4619 s, elapsed_time = 113.0086 s, estimated_remaining_time = 307.6345 s
+t = 2.7, S_EE = 1.8339, F = 0.4137, χ = 150 / 1500, step_time = 2.6585 s, elapsed_time = 117.8146 s, estimated_remaining_time = 312.7442 s
+t = 2.75, S_EE = 1.8654, F = 0.4195, χ = 156 / 1500, step_time = 2.5181 s, elapsed_time = 123.3314 s, estimated_remaining_time = 319.3402 s
+t = 2.8, S_EE = 1.8969, F = 0.4253, χ = 163 / 1500, step_time = 3.3586 s, elapsed_time = 129.4279 s, estimated_remaining_time = 326.9757 s
+t = 2.85, S_EE = 1.9284, F = 0.4311, χ = 170 / 1500, step_time = 3.3007 s, elapsed_time = 135.9287 s, estimated_remaining_time = 335.1346 s
+t = 2.9, S_EE = 1.9598, F = 0.4368, χ = 178 / 1500, step_time = 4.0155 s, elapsed_time = 142.8547 s, estimated_remaining_time = 343.8198 s
+t = 2.95, S_EE = 1.9913, F = 0.4426, χ = 185 / 1500, step_time = 4.8941 s, elapsed_time = 150.6813 s, estimated_remaining_time = 354.1011 s
+t = 3.0, S_EE = 2.0228, F = 0.4484, χ = 192 / 1500, step_time = 4.7177 s, elapsed_time = 159.0862 s, estimated_remaining_time = 365.1159 s
+t = 3.05, S_EE = 2.0542, F = 0.4541, χ = 200 / 1500, step_time = 5.2491 s, elapsed_time = 168.0962 s, estimated_remaining_time = 376.8608 s
+t = 3.1, S_EE = 2.0857, F = 0.4598, χ = 209 / 1500, step_time = 5.6607 s, elapsed_time = 177.6108 s, estimated_remaining_time = 389.0522 s
+t = 3.15, S_EE = 2.1171, F = 0.4656, χ = 218 / 1500, step_time = 5.6002 s, elapsed_time = 187.2161 s, estimated_remaining_time = 400.7595 s
+t = 3.2, S_EE = 2.1485, F = 0.4713, χ = 226 / 1500, step_time = 5.4811 s, elapsed_time = 196.9687 s, estimated_remaining_time = 412.1191 s
+t = 3.25, S_EE = 2.1799, F = 0.477, χ = 237 / 1500, step_time = 7.0517 s, elapsed_time = 208.746 s, estimated_remaining_time = 426.9805 s
+t = 3.3, S_EE = 2.2113, F = 0.4827, χ = 246 / 1500, step_time = 6.5376 s, elapsed_time = 220.0962 s, estimated_remaining_time = 440.1924 s
+t = 3.35, S_EE = 2.2427, F = 0.4884, χ = 256 / 1500, step_time = 6.4939 s, elapsed_time = 232.3562 s, estimated_remaining_time = 454.4614 s
+t = 3.4, S_EE = 2.2741, F = 0.4941, χ = 266 / 1500, step_time = 7.7227 s, elapsed_time = 245.1024 s, estimated_remaining_time = 468.8915 s
+t = 3.45, S_EE = 2.3055, F = 0.4998, χ = 278 / 1500, step_time = 9.0697 s, elapsed_time = 261.7395 s, estimated_remaining_time = 489.8268 s
+t = 3.5, S_EE = 2.3368, F = 0.5055, χ = 290 / 1500, step_time = 10.4235 s, elapsed_time = 278.7365 s, estimated_remaining_time = 510.3626 s
+t = 3.55, S_EE = 2.3681, F = 0.5111, χ = 303 / 1500, step_time = 8.7452 s, elapsed_time = 295.6831 s, estimated_remaining_time = 529.7656 s
+t = 3.6, S_EE = 2.3995, F = 0.5168, χ = 315 / 1500, step_time = 9.4517 s, elapsed_time = 312.8053 s, estimated_remaining_time = 548.4805 s
+t = 3.65, S_EE = 2.4308, F = 0.5224, χ = 329 / 1500, step_time = 10.5324 s, elapsed_time = 332.5299 s, estimated_remaining_time = 570.6932 s
+t = 3.7, S_EE = 2.4621, F = 0.5281, χ = 343 / 1500, step_time = 11.7905 s, elapsed_time = 352.2587 s, estimated_remaining_time = 591.7946 s
+t = 3.75, S_EE = 2.4934, F = 0.5337, χ = 357 / 1500, step_time = 12.3018 s, elapsed_time = 373.85 s, estimated_remaining_time = 614.8849 s
+t = 3.8, S_EE = 2.5247, F = 0.5393, χ = 372 / 1500, step_time = 13.7783 s, elapsed_time = 399.0153 s, estimated_remaining_time = 642.5701 s
+t = 3.85, S_EE = 2.556, F = 0.5449, χ = 387 / 1500, step_time = 14.7201 s, elapsed_time = 424.1789 s, estimated_remaining_time = 668.8975 s
+t = 3.9, S_EE = 2.5872, F = 0.5506, χ = 401 / 1500, step_time = 16.4665 s, elapsed_time = 452.9069 s, estimated_remaining_time = 699.4258 s
+t = 3.95, S_EE = 2.6185, F = 0.5561, χ = 418 / 1500, step_time = 15.4742 s, elapsed_time = 481.9736 s, estimated_remaining_time = 728.9851 s
+t = 4.0, S_EE = 2.6498, F = 0.5617, χ = 436 / 1500, step_time = 16.4045 s, elapsed_time = 512.5221 s, estimated_remaining_time = 759.292 s
+t = 4.05, S_EE = 2.681, F = 0.5673, χ = 454 / 1500, step_time = 17.4461 s, elapsed_time = 543.456 s, estimated_remaining_time = 788.674 s
+t = 4.1, S_EE = 2.7122, F = 0.5729, χ = 472 / 1500, step_time = 20.3105 s, elapsed_time = 578.1402 s, estimated_remaining_time = 821.9343 s
+t = 4.15, S_EE = 2.7434, F = 0.5785, χ = 493 / 1500, step_time = 21.3327 s, elapsed_time = 616.1973 s, estimated_remaining_time = 858.2748 s
+t = 4.2, S_EE = 2.7747, F = 0.584, χ = 514 / 1500, step_time = 22.2034 s, elapsed_time = 655.1935 s, estimated_remaining_time = 894.1464 s
+t = 4.25, S_EE = 2.8059, F = 0.5896, χ = 536 / 1500, step_time = 25.7868 s, elapsed_time = 701.4347 s, estimated_remaining_time = 937.965 s
+t = 4.3, S_EE = 2.837, F = 0.5951, χ = 559 / 1500, step_time = 25.4538 s, elapsed_time = 747.194 s, estimated_remaining_time = 979.0818 s
+t = 4.35, S_EE = 2.8682, F = 0.6006, χ = 584 / 1500, step_time = 26.1202 s, elapsed_time = 794.3949 s, estimated_remaining_time = 1020.0753 s
+t = 4.4, S_EE = 2.8994, F = 0.6062, χ = 608 / 1500, step_time = 28.613 s, elapsed_time = 847.3045 s, estimated_remaining_time = 1066.2708 s
+t = 4.45, S_EE = 2.9305, F = 0.6117, χ = 635 / 1500, step_time = 33.1168 s, elapsed_time = 905.728 s, estimated_remaining_time = 1117.0645 s
+t = 4.5, S_EE = 2.9617, F = 0.6172, χ = 662 / 1500, step_time = 36.4027 s, elapsed_time = 970.4224 s, estimated_remaining_time = 1173.0381 s
+t = 4.55, S_EE = 2.9928, F = 0.6227, χ = 689 / 1500, step_time = 36.5356 s, elapsed_time = 1036.8886 s, estimated_remaining_time = 1228.4876 s
+t = 4.6, S_EE = 3.0239, F = 0.6282, χ = 717 / 1500, step_time = 37.9742 s, elapsed_time = 1106.3102 s, estimated_remaining_time = 1284.7473 s
+t = 4.65, S_EE = 3.055, F = 0.6337, χ = 747 / 1500, step_time = 42.0623 s, elapsed_time = 1182.2486 s, estimated_remaining_time = 1345.7511 s
+t = 4.7, S_EE = 3.0861, F = 0.6392, χ = 779 / 1500, step_time = 49.0315 s, elapsed_time = 1268.9802 s, estimated_remaining_time = 1415.9147 s
+t = 4.75, S_EE = 3.1172, F = 0.6446, χ = 812 / 1500, step_time = 54.1805 s, elapsed_time = 1365.0557 s, estimated_remaining_time = 1493.0297 s
+t = 4.8, S_EE = 3.1483, F = 0.6501, χ = 846 / 1500, step_time = 54.8234 s, elapsed_time = 1464.3302 s, estimated_remaining_time = 1570.0035 s
+t = 4.85, S_EE = 3.1793, F = 0.6556, χ = 881 / 1500, step_time = 60.7863 s, elapsed_time = 1573.1851 s, estimated_remaining_time = 1653.4496 s

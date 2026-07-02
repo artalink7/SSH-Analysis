@@ -23,7 +23,8 @@ export GenerateDataEntropy, GenerateDataEntropyEquilibrium,
        siteinds, product_state_Nf, build_SSH_MPO_OBC, build_SSH_MPO_PBC,
        ground_energy, correlation_matrix, measure_observables, expect,
        randomMPS, create_CDW_states, run_dmrg_cdw, simulate_quench, DataFrame, CSV,
-       ExpectationValue_HamiltonianSub, EnergyFluctuationsEntropy, simulate_quench_initial_disorder
+       ExpectationValue_HamiltonianSub, EnergyFluctuationsEntropy, simulate_quench_initial_disorder,
+       SSHParams
 
 include("BlochVectors.jl")
 include("DensityMatrix.jl")
