@@ -107,3 +107,117 @@ t = 4.7, S_EE = 3.0861, F = 0.6392, χ = 779 / 1500, step_time = 49.0315 s, elap
 t = 4.75, S_EE = 3.1172, F = 0.6446, χ = 812 / 1500, step_time = 54.1805 s, elapsed_time = 1365.0557 s, estimated_remaining_time = 1493.0297 s
 t = 4.8, S_EE = 3.1483, F = 0.6501, χ = 846 / 1500, step_time = 54.8234 s, elapsed_time = 1464.3302 s, estimated_remaining_time = 1570.0035 s
 t = 4.85, S_EE = 3.1793, F = 0.6556, χ = 881 / 1500, step_time = 60.7863 s, elapsed_time = 1573.1851 s, estimated_remaining_time = 1653.4496 s
+t = 4.9, S_EE = 3.2104, F = 0.661, χ = 919 / 1500, step_time = 64.3678 s, elapsed_time = 1689.3527 s, estimated_remaining_time = 1740.5452 s
+t = 4.95, S_EE = 3.2414, F = 0.6665, χ = 957 / 1500, step_time = 67.3104 s, elapsed_time = 1813.8172 s, estimated_remaining_time = 1831.9554 s
+t = 5.0, S_EE = 3.2725, F = 0.6719, χ = 998 / 1500, step_time = 72.4374 s, elapsed_time = 1944.7627 s, estimated_remaining_time = 1925.5076 s
+t = 5.05, S_EE = 3.3035, F = 0.6773, χ = 1040 / 1500, step_time = 72.4227 s, elapsed_time = 2078.5741 s, estimated_remaining_time = 2017.4396 s
+t = 5.1, S_EE = 3.3345, F = 0.6828, χ = 1084 / 1500, step_time = 80.0167 s, elapsed_time = 2224.1659 s, estimated_remaining_time = 2116.1967 s
+t = 5.15, S_EE = 3.3655, F = 0.6882, χ = 1130 / 1500, step_time = 86.9364 s, elapsed_time = 2387.4858 s, estimated_remaining_time = 2226.7896 s
+t = 5.2, S_EE = 3.3965, F = 0.6936, χ = 1178 / 1500, step_time = 93.5315 s, elapsed_time = 2566.1323 s, estimated_remaining_time = 2346.1781 s
+t = 5.25, S_EE = 3.4275, F = 0.699, χ = 1228 / 1500, step_time = 97.5097 s, elapsed_time = 2749.4946 s, estimated_remaining_time = 2464.1697 s
+t = 5.3, S_EE = 3.4585, F = 0.7044, χ = 1278 / 1500, step_time = 117.3195 s, elapsed_time = 2962.7443 s, estimated_remaining_time = 2602.7847 s
+t = 5.35, S_EE = 3.4894, F = 0.7098, χ = 1332 / 1500, step_time = 114.2522 s, elapsed_time = 3176.2571 s, estimated_remaining_time = 2735.1103 s
+t = 5.4, S_EE = 3.5204, F = 0.7151, χ = 1388 / 1500, step_time = 123.9364 s, elapsed_time = 3410.3381 s, estimated_remaining_time = 2878.4505 s
+t = 5.45, S_EE = 3.5513, F = 0.7205, χ = 1446 / 1500, step_time = 133.7279 s, elapsed_time = 3661.3303 s, estimated_remaining_time = 3028.9187 s
+t = 5.5, S_EE = 3.5823, F = 0.7259, χ = 1500 / 1500, step_time = 144.7371 s, elapsed_time = 3934.2559 s, estimated_remaining_time = 3189.9372 s
+Warning: Maximum bond dimension reached at t = 5.5. Consider increasing bond_dim.
+t = 5.55, S_EE = 3.6132, F = 0.7312, χ = 1500 / 1500, step_time = 157.4064 s, elapsed_time = 4235.216 s, estimated_remaining_time = 3365.4841 s
+Warning: Maximum bond dimension reached at t = 5.55. Consider increasing bond_dim.
+t = 5.6, S_EE = 3.6441, F = 0.7366, χ = 1500 / 1500, step_time = 170.5593 s, elapsed_time = 4563.8034 s, estimated_remaining_time = 3554.1124 s
+Warning: Maximum bond dimension reached at t = 5.6. Consider increasing bond_dim.
+t = 5.65, S_EE = 3.675, F = 0.7419, χ = 1500 / 1500, step_time = 179.4835 s, elapsed_time = 4913.1818 s, estimated_remaining_time = 3749.5335 s
+Warning: Maximum bond dimension reached at t = 5.65. Consider increasing bond_dim.
+t = 5.7, S_EE = 3.7059, F = 0.7473, χ = 1500 / 1500, step_time = 184.1235 s, elapsed_time = 5278.7595 s, estimated_remaining_time = 3947.5941 s
+Warning: Maximum bond dimension reached at t = 5.7. Consider increasing bond_dim.
+t = 5.75, S_EE = 3.7368, F = 0.7526, χ = 1500 / 1500, step_time = 184.2561 s, elapsed_time = 5647.7035 s, estimated_remaining_time = 4138.4034 s
+Warning: Maximum bond dimension reached at t = 5.75. Consider increasing bond_dim.
+t = 5.8, S_EE = 3.7676, F = 0.7579, χ = 1500 / 1500, step_time = 196.1005 s, elapsed_time = 6025.0674 s, estimated_remaining_time = 4325.6894 s
+Warning: Maximum bond dimension reached at t = 5.8. Consider increasing bond_dim.
+t = 5.85, S_EE = 3.7985, F = 0.7632, χ = 1500 / 1500, step_time = 186.2871 s, elapsed_time = 6393.2962 s, estimated_remaining_time = 4496.9795 s
+Warning: Maximum bond dimension reached at t = 5.85. Consider increasing bond_dim.
+t = 5.9, S_EE = 3.8293, F = 0.7686, χ = 1500 / 1500, step_time = 184.239 s, elapsed_time = 6760.721 s, estimated_remaining_time = 4658.6481 s
+Warning: Maximum bond dimension reached at t = 5.9. Consider increasing bond_dim.
+t = 5.95, S_EE = 3.8602, F = 0.7739, χ = 1500 / 1500, step_time = 186.8139 s, elapsed_time = 7130.1227 s, estimated_remaining_time = 4812.8328 s
+Warning: Maximum bond dimension reached at t = 5.95. Consider increasing bond_dim.
+t = 6.0, S_EE = 3.891, F = 0.7792, χ = 1500 / 1500, step_time = 184.6329 s, elapsed_time = 7499.9853 s, estimated_remaining_time = 4958.668 s
+Warning: Maximum bond dimension reached at t = 6.0. Consider increasing bond_dim.
+t = 6.05, S_EE = 3.9218, F = 0.7845, χ = 1500 / 1500, step_time = 183.8369 s, elapsed_time = 7863.8523 s, estimated_remaining_time = 5092.1667 s
+Warning: Maximum bond dimension reached at t = 6.05. Consider increasing bond_dim.
+t = 6.1, S_EE = 3.9526, F = 0.7897, χ = 1500 / 1500, step_time = 184.3181 s, elapsed_time = 8228.5375 s, estimated_remaining_time = 5218.097 s
+Warning: Maximum bond dimension reached at t = 6.1. Consider increasing bond_dim.
+t = 6.15, S_EE = 3.9834, F = 0.795, χ = 1500 / 1500, step_time = 185.1211 s, elapsed_time = 8594.2057 s, estimated_remaining_time = 5336.7245 s
+Warning: Maximum bond dimension reached at t = 6.15. Consider increasing bond_dim.
+t = 6.2, S_EE = 4.0142, F = 0.8003, χ = 1500 / 1500, step_time = 198.2596 s, elapsed_time = 8973.4643 s, estimated_remaining_time = 5455.8663 s
+Warning: Maximum bond dimension reached at t = 6.2. Consider increasing bond_dim.
+t = 6.25, S_EE = 4.045, F = 0.8056, χ = 1500 / 1500, step_time = 183.7835 s, elapsed_time = 9337.7649 s, estimated_remaining_time = 5558.1934 s
+Warning: Maximum bond dimension reached at t = 6.25. Consider increasing bond_dim.
+t = 6.3, S_EE = 4.0758, F = 0.8108, χ = 1500 / 1500, step_time = 185.9114 s, elapsed_time = 9705.4551 s, estimated_remaining_time = 5655.1471 s
+Warning: Maximum bond dimension reached at t = 6.3. Consider increasing bond_dim.
+t = 6.35, S_EE = 4.1065, F = 0.8161, χ = 1500 / 1500, step_time = 194.9939 s, elapsed_time = 10085.3989 s, estimated_remaining_time = 5751.8291 s
+Warning: Maximum bond dimension reached at t = 6.35. Consider increasing bond_dim.
+t = 6.4, S_EE = 4.1373, F = 0.8213, χ = 1500 / 1500, step_time = 186.4177 s, elapsed_time = 10454.4664 s, estimated_remaining_time = 5835.051 s
+Warning: Maximum bond dimension reached at t = 6.4. Consider increasing bond_dim.
+t = 6.45, S_EE = 4.168, F = 0.8266, χ = 1500 / 1500, step_time = 186.1937 s, elapsed_time = 10822.1213 s, estimated_remaining_time = 5910.5432 s
+Warning: Maximum bond dimension reached at t = 6.45. Consider increasing bond_dim.
+t = 6.5, S_EE = 4.1988, F = 0.8318, χ = 1500 / 1500, step_time = 186.3599 s, elapsed_time = 11189.8621 s, estimated_remaining_time = 5979.3156 s
+Warning: Maximum bond dimension reached at t = 6.5. Consider increasing bond_dim.
+t = 6.55, S_EE = 4.2295, F = 0.837, χ = 1500 / 1500, step_time = 203.9827 s, elapsed_time = 11582.8586 s, estimated_remaining_time = 6054.6761 s
+Warning: Maximum bond dimension reached at t = 6.55. Consider increasing bond_dim.
+t = 6.6, S_EE = 4.2602, F = 0.8422, χ = 1500 / 1500, step_time = 200.3617 s, elapsed_time = 11976.3422 s, estimated_remaining_time = 6123.2426 s
+Warning: Maximum bond dimension reached at t = 6.6. Consider increasing bond_dim.
+t = 6.65, S_EE = 4.2908, F = 0.8475, χ = 1500 / 1500, step_time = 200.2234 s, elapsed_time = 12366.0534 s, estimated_remaining_time = 6183.0267 s
+Warning: Maximum bond dimension reached at t = 6.65. Consider increasing bond_dim.
+t = 6.7, S_EE = 4.3215, F = 0.8527, χ = 1500 / 1500, step_time = 203.9104 s, elapsed_time = 12761.711 s, estimated_remaining_time = 6239.0587 s
+Warning: Maximum bond dimension reached at t = 6.7. Consider increasing bond_dim.
+t = 6.75, S_EE = 4.3522, F = 0.8579, χ = 1500 / 1500, step_time = 196.9623 s, elapsed_time = 13147.2022 s, estimated_remaining_time = 6283.5893 s
+Warning: Maximum bond dimension reached at t = 6.75. Consider increasing bond_dim.
+t = 6.8, S_EE = 4.3828, F = 0.8631, χ = 1500 / 1500, step_time = 191.9203 s, elapsed_time = 13524.6059 s, estimated_remaining_time = 6318.0641 s
+Warning: Maximum bond dimension reached at t = 6.8. Consider increasing bond_dim.
+t = 6.85, S_EE = 4.4134, F = 0.8682, χ = 1500 / 1500, step_time = 196.1534 s, elapsed_time = 13907.3103 s, estimated_remaining_time = 6348.9895 s
+Warning: Maximum bond dimension reached at t = 6.85. Consider increasing bond_dim.
+t = 6.9, S_EE = 4.444, F = 0.8734, χ = 1500 / 1500, step_time = 215.6878 s, elapsed_time = 14317.9529 s, estimated_remaining_time = 6386.425 s
+Warning: Maximum bond dimension reached at t = 6.9. Consider increasing bond_dim.
+t = 6.95, S_EE = 4.4745, F = 0.8786, χ = 1500 / 1500, step_time = 213.4637 s, elapsed_time = 14736.8815 s, estimated_remaining_time = 6421.0698 s
+Warning: Maximum bond dimension reached at t = 6.95. Consider increasing bond_dim.
+t = 7.0, S_EE = 4.505, F = 0.8837, χ = 1500 / 1500, step_time = 219.3784 s, elapsed_time = 15157.5942 s, estimated_remaining_time = 6450.0401 s
+Warning: Maximum bond dimension reached at t = 7.0. Consider increasing bond_dim.
+t = 7.05, S_EE = 4.5355, F = 0.8889, χ = 1500 / 1500, step_time = 204.7049 s, elapsed_time = 15554.5483 s, estimated_remaining_time = 6462.8053 s
+Warning: Maximum bond dimension reached at t = 7.05. Consider increasing bond_dim.
+t = 7.1, S_EE = 4.5659, F = 0.894, χ = 1500 / 1500, step_time = 192.8581 s, elapsed_time = 15935.9778 s, estimated_remaining_time = 6463.5434 s
+Warning: Maximum bond dimension reached at t = 7.1. Consider increasing bond_dim.
+t = 7.15, S_EE = 4.5963, F = 0.8991, χ = 1500 / 1500, step_time = 189.4138 s, elapsed_time = 16311.8996 s, estimated_remaining_time = 6456.7936 s
+Warning: Maximum bond dimension reached at t = 7.15. Consider increasing bond_dim.
+t = 7.2, S_EE = 4.6266, F = 0.9042, χ = 1500 / 1500, step_time = 184.8366 s, elapsed_time = 16684.8119 s, estimated_remaining_time = 6443.7894 s
+Warning: Maximum bond dimension reached at t = 7.2. Consider increasing bond_dim.
+t = 7.25, S_EE = 4.6568, F = 0.9093, χ = 1500 / 1500, step_time = 186.115 s, elapsed_time = 17052.414 s, estimated_remaining_time = 6423.8546 s
+Warning: Maximum bond dimension reached at t = 7.25. Consider increasing bond_dim.
+t = 7.3, S_EE = 4.687, F = 0.9144, χ = 1500 / 1500, step_time = 190.1399 s, elapsed_time = 17426.238 s, estimated_remaining_time = 6401.4752 s
+Warning: Maximum bond dimension reached at t = 7.3. Consider increasing bond_dim.
+t = 7.35, S_EE = 4.717, F = 0.9194, χ = 1500 / 1500, step_time = 193.2225 s, elapsed_time = 17807.6639 s, estimated_remaining_time = 6377.0688 s
+Warning: Maximum bond dimension reached at t = 7.35. Consider increasing bond_dim.
+t = 7.4, S_EE = 4.747, F = 0.9244, χ = 1500 / 1500, step_time = 188.9383 s, elapsed_time = 18187.0582 s, estimated_remaining_time = 6347.1613 s
+Warning: Maximum bond dimension reached at t = 7.4. Consider increasing bond_dim.
+t = 7.45, S_EE = 4.7768, F = 0.9295, χ = 1500 / 1500, step_time = 196.1559 s, elapsed_time = 18570.2022 s, estimated_remaining_time = 6313.8687 s
+Warning: Maximum bond dimension reached at t = 7.45. Consider increasing bond_dim.
+t = 7.5, S_EE = 4.8065, F = 0.9344, χ = 1500 / 1500, step_time = 189.0565 s, elapsed_time = 18940.1251 s, estimated_remaining_time = 6271.5646 s
+Warning: Maximum bond dimension reached at t = 7.5. Consider increasing bond_dim.
+t = 7.55, S_EE = 4.836, F = 0.9394, χ = 1500 / 1500, step_time = 197.9893 s, elapsed_time = 19323.6963 s, estimated_remaining_time = 6229.3495 s
+Warning: Maximum bond dimension reached at t = 7.55. Consider increasing bond_dim.
+t = 7.6, S_EE = 4.8654, F = 0.9443, χ = 1500 / 1500, step_time = 210.1598 s, elapsed_time = 19732.3626 s, estimated_remaining_time = 6190.5451 s
+Warning: Maximum bond dimension reached at t = 7.6. Consider increasing bond_dim.
+t = 7.65, S_EE = 4.8946, F = 0.9492, χ = 1500 / 1500, step_time = 188.1581 s, elapsed_time = 20110.9445 s, estimated_remaining_time = 6137.7558 s
+Warning: Maximum bond dimension reached at t = 7.65. Consider increasing bond_dim.
+t = 7.7, S_EE = 4.9235, F = 0.954, χ = 1500 / 1500, step_time = 191.9929 s, elapsed_time = 20485.4259 s, estimated_remaining_time = 6079.5458 s
+Warning: Maximum bond dimension reached at t = 7.7. Consider increasing bond_dim.
+t = 7.75, S_EE = 4.9523, F = 0.9588, χ = 1500 / 1500, step_time = 191.2047 s, elapsed_time = 20859.5728 s, estimated_remaining_time = 6017.1845 s
+Warning: Maximum bond dimension reached at t = 7.75. Consider increasing bond_dim.
+t = 7.8, S_EE = 4.9808, F = 0.9636, χ = 1500 / 1500, step_time = 202.6993 s, elapsed_time = 21249.6638 s, estimated_remaining_time = 5955.3198 s
+Warning: Maximum bond dimension reached at t = 7.8. Consider increasing bond_dim.
+t = 7.85, S_EE = 5.009, F = 0.9683, χ = 1500 / 1500, step_time = 201.5407 s, elapsed_time = 21649.5424 s, estimated_remaining_time = 5891.9641 s
+Warning: Maximum bond dimension reached at t = 7.85. Consider increasing bond_dim.
+t = 7.9, S_EE = 5.037, F = 0.9729, χ = 1500 / 1500, step_time = 209.7257 s, elapsed_time = 22061.3422 s, estimated_remaining_time = 5827.5244 s
+Warning: Maximum bond dimension reached at t = 7.9. Consider increasing bond_dim.
+t = 7.95, S_EE = 5.0646, F = 0.9775, χ = 1500 / 1500, step_time = 196.1204 s, elapsed_time = 22452.2526 s, estimated_remaining_time = 5753.3897 s
+Warning: Maximum bond dimension reached at t = 7.95. Consider increasing bond_dim.
+t = 8.0, S_EE = 5.092, F = 0.9821, χ = 1500 / 1500, step_time = 215.1813 s, elapsed_time = 22863.6204 s, estimated_remaining_time = 5680.4026 s
+Warning: Maximum bond dimension reached at t = 8.0. Consider increasing bond_dim.
