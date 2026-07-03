@@ -163,7 +163,7 @@ function build_tebd_gates(sites, p::SSHParams; dt=0.05)
     return gates
 end
 
-function simulate_quench(N_sites, T_max, dt, pre::SSHParams, post::SSHParams; bond_dim=1000, logfile=nothing)
+function simulate_quench(N_sites, T_max, dt, pre::SSHParams, post::SSHParams; bond_dim=1000, cutoff=1e-8, logfile=nothing)
     # --- Set up logging and progress tracking ---
     log_io = logfile === nothing ? nothing : open(logfile, "w")
     function log(msg)
@@ -221,7 +221,7 @@ function simulate_quench(N_sites, T_max, dt, pre::SSHParams, post::SSHParams; bo
 
         # Apply the Trotter gates to evolve the state by dt
         # 'cutoff' and 'maxdim' are critical here to manage entanglement growth
-        psi = apply(gates, psi; cutoff=1e-10, maxdim=bond_dim)
+        psi = apply(gates, psi; cutoff=cutoff, maxdim=bond_dim)
         norm_before = norm(psi)
         normalize!(psi) # Normalize after each full Trotter step
         step_time = round(time() - step_start, digits=4)
