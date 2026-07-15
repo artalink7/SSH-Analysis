@@ -14,6 +14,7 @@ using ITensorGaussianMPS
 using Statistics
 using DataFrames
 using CSV
+using HDF5
 
 export GenerateDataEntropy, GenerateDataEntropyEquilibrium, 
        GenerateDataVarianceEquilibrium, GenerateDataVariance,  

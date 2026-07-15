@@ -163,8 +163,79 @@ function build_tebd_gates(sites, p::SSHParams; dt=0.05)
     return gates
 end
 
-function simulate_quench(N_sites, T_max, dt, pre::SSHParams, post::SSHParams; bond_dim=1000, cutoff=1e-8, logfile=nothing)
-    # --- Set up logging and progress tracking ---
+#
+# PATCHED VERSION of the quench-related functions from your SSHAnalysis module.
+#
+# What changed vs. your original, and why:
+#
+#   1. simulate_quench() now logs `norm_before` (the norm of psi right after
+#      `apply(...)` but before `normalize!`). You were already computing this
+#      and discarding it — it's actually your truncation-error diagnostic.
+#      Since the TEBD gates are unitary, exact evolution preserves the norm;
+#      any drop below 1 comes purely from SVD truncation at maxdim/cutoff.
+#      We turn it into a running "cumulative fidelity" estimate:
+#           total_fidelity *= norm_before^2
+#      so you get a concrete, per-step and cumulative number for how much
+#      the χ=1700 cap is actually costing you past t≈3.7, instead of just
+#      knowing "χ hit the ceiling".
+#
+#   2. Checkpointing: psi + accumulated observables are written to an HDF5
+#      file every `checkpoint_every` steps. This means (a) a crash doesn't
+#      cost you the full run, and (b) you can extend/rerun the *tail* of a
+#      quench at a larger bond_dim without redoing DMRG + the cheap early
+#      dynamics.
+#
+#   3. Resume support: pass `resume_from=<checkpoint path>` to continue an
+#      evolution from a saved state, optionally with a different bond_dim
+#      or cutoff than the original run used.
+#
+#   4. Threading hooks: see quench_run_script_patched.jl — the physics code
+#      here is unchanged except for the two additions above, since threading
+#      is a global/process-level setting, not something that belongs inside
+#      this function.
+#
+# Everything else (build_SSH_MPO_OBC, build_tebd_gates, measure_observables,
+# product_state_Nf, ground_energy, create_CDW_states) is untouched — paste
+# this in place of your existing simulate_quench, and add the two small
+# helper functions (save_checkpoint / load_checkpoint) alongside it.
+
+# ---------------------------------------------------------------------
+# Checkpoint helpers
+# ---------------------------------------------------------------------
+
+function save_checkpoint(path, psi, step, t, S_EE_vals, F_vals, total_fidelity)
+    h5open(path, "w") do file
+        write(file, "psi", psi)
+        write(file, "step", step)
+        write(file, "t", t)
+        write(file, "S_EE_vals", S_EE_vals)
+        write(file, "F_vals", F_vals)
+        write(file, "total_fidelity", total_fidelity)
+    end
+end
+
+function load_checkpoint(path)
+    return h5open(path, "r") do file
+        psi = read(file, "psi", MPS)
+        step = read(file, "step")
+        t = read(file, "t")
+        S_EE_vals = read(file, "S_EE_vals")
+        F_vals = read(file, "F_vals")
+        total_fidelity = read(file, "total_fidelity")
+        (psi=psi, step=step, t=t, S_EE_vals=S_EE_vals, F_vals=F_vals,
+         total_fidelity=total_fidelity)
+    end
+end
+
+# ---------------------------------------------------------------------
+# simulate_quench, patched
+# ---------------------------------------------------------------------
+
+function simulate_quench(N_sites, T_max, dt, pre::SSHParams, post::SSHParams;
+                          bond_dim=1000, cutoff=1e-8, logfile=nothing,
+                          checkpoint_file=nothing, checkpoint_every=20,
+                          resume_from=nothing)
+
     log_io = logfile === nothing ? nothing : open(logfile, "w")
     function log(msg)
         println(msg)
@@ -176,71 +247,117 @@ function simulate_quench(N_sites, T_max, dt, pre::SSHParams, post::SSHParams; bo
 
     log("="^60)
     log("Quench simulation started: $(now())")
-    log("N_sites = $N_sites, T_max = $T_max, dt = $dt, bond_dim = $bond_dim")
+    log("N_sites = $N_sites, T_max = $T_max, dt = $dt, bond_dim = $bond_dim, cutoff = $cutoff")
     log("Pre-quench parameters: v=$(pre.v), w=$(pre.w), Δ=$(pre.Δ), V=$(pre.V)")
     log("Post-quench parameters: v=$(post.v), w=$(post.w), Δ=$(post.Δ), V=$(post.V)")
+    if resume_from !== nothing
+        log("Resuming from checkpoint: $resume_from")
+    end
     log("="^60)
 
-    # 1. Initialize sites with particle number conservation
-    sites = siteinds("Fermion", N_sites; conserve_qns=true)
-    
-    # 2. Prepare the Initial State (t < 0)
-    log("Preparing interacting ground state (t < 0)...")
-    println("Preparing interacting ground state (t < 0)...")
-    H_init = build_SSH_MPO_OBC(sites; p=pre)
-    
-    # Using half-filling based on product state function
-    init_state = product_state_Nf(N_sites, N_sites ÷ 2) 
-    t_dmrg_start = time()
-    E0, psi = ground_energy(H_init, sites; init_state=init_state, nsweeps=12)
-    log("Initial Ground State Energy: $E0 (DMRG took $(round(time() - t_dmrg_start, digits=2)) seconds)")
-    log("Initial max bond dimension: $(maxlinkdim(psi))")
-    println("Initial Ground State Energy: ", E0)
-    
-    # 3. Build TEBD gates for post-quench Hamiltonian (t > 0)
-    log("Constructing TEBD gates for quench...")
-    println("Constructing TEBD gates for quench...")
-    gates = build_tebd_gates(sites, post; dt=dt)
-    
-    # 4. Time Evolution Loop
     times = 0.0:dt:T_max
+    use_interacting_formula = !iszero(post.V) || !iszero(pre.V)
+
+    local sites, psi, gates
     S_EE_vals = Float64[]
     F_vals = Float64[]
-    
-    use_interacting_formula = !iszero(post.V) || !iszero(pre.V)
-    
+    start_step = 1
+    total_fidelity = 1.0
+
+    if resume_from === nothing
+        # --- Fresh start: sites, ground state, gates as before ---
+        sites = siteinds("Fermion", N_sites; conserve_qns=true)
+
+        log("Preparing interacting ground state (t < 0)...")
+        H_init = build_SSH_MPO_OBC(sites; p=pre)
+        init_state = product_state_Nf(N_sites, N_sites ÷ 2)
+        t_dmrg_start = time()
+        E0, psi = ground_energy(H_init, sites; init_state=init_state, nsweeps=12)
+        log("Initial Ground State Energy: $E0 (DMRG took $(round(time() - t_dmrg_start, digits=2)) seconds)")
+        log("Initial max bond dimension: $(maxlinkdim(psi))")
+
+        log("Constructing TEBD gates for quench...")
+        gates = build_tebd_gates(sites, post; dt=dt)
+    else
+        # --- Resume: load psi + history, rebuild gates against its sites ---
+        ckpt = load_checkpoint(resume_from)
+        psi = ckpt.psi
+        sites = siteinds(psi)
+        S_EE_vals = ckpt.S_EE_vals
+        F_vals = ckpt.F_vals
+        total_fidelity = ckpt.total_fidelity
+        start_step = ckpt.step + 1
+        log("Loaded checkpoint at step $(ckpt.step), t = $(ckpt.t), " *
+            "cumulative fidelity so far = $(round(total_fidelity, digits=6))")
+
+        log("Constructing TEBD gates for quench (post-resume bond_dim=$bond_dim, cutoff=$cutoff)...")
+        gates = build_tebd_gates(sites, post; dt=dt)
+    end
+
     log("Starting time evolution...")
     t_evolution_start = time()
+
     for (step, t) in enumerate(times)
-        # Measure observables before applying the time step
-        S_EE, F = measure_observables(psi, N_sites, use_interacting_formula ? 1.0 : 0.0)
-        push!(S_EE_vals, S_EE)
-        push!(F_vals, F)
+        step < start_step && continue  # skip steps already done before the checkpoint
+
+        if step >= start_step && length(S_EE_vals) < step
+            # only measure if we don't already have this step's values from a checkpoint
+            S_EE, F = measure_observables(psi, N_sites, use_interacting_formula ? 1.0 : 0.0)
+            push!(S_EE_vals, S_EE)
+            push!(F_vals, F)
+        else
+            S_EE, F = S_EE_vals[step], F_vals[step]
+        end
 
         step_start = time()
 
-        # Apply the Trotter gates to evolve the state by dt
-        # 'cutoff' and 'maxdim' are critical here to manage entanglement growth
         psi = apply(gates, psi; cutoff=cutoff, maxdim=bond_dim)
-        norm_before = norm(psi)
-        normalize!(psi) # Normalize after each full Trotter step
+        norm_before = norm(psi)          # <-- truncation-error diagnostic
+        normalize!(psi)
         step_time = round(time() - step_start, digits=4)
+
+        # Cumulative fidelity estimate: since the gates are unitary, any norm
+        # loss at this step is purely truncation. norm_before^2 approximates
+        # the fraction of weight kept at this step; multiplying across steps
+        # gives a running lower-bound-ish estimate of overlap with the exact
+        # (untruncated) state.
+        total_fidelity *= norm_before^2
 
         chi = maxlinkdim(psi)
         elapsed_time = round(time() - t_evolution_start, digits=4)
-        eta = (elapsed_time / step) * (length(times) - step)
-        log("t = $(round(t, digits=3)), S_EE = $(round(S_EE, digits=4)), F = $(round(F, digits=4)), χ = $chi / $bond_dim, step_time = $step_time s, elapsed_time = $elapsed_time s, estimated_remaining_time = $(round(eta, digits=4)) s")
-        println("Time: ", round(t, digits=3), " | S_EE: ", round(S_EE, digits=4), " | F: ", round(F, digits=4))
+        eta = (elapsed_time / (step - start_step + 1)) * (length(times) - step)
+
+        log("t = $(round(t, digits=3)), S_EE = $(round(S_EE, digits=4)), " *
+            "F = $(round(F, digits=4)), χ = $chi / $bond_dim, " *
+            "norm_before = $(round(norm_before, digits=8)), " *
+            "cum_fidelity = $(round(total_fidelity, digits=6)), " *
+            "step_time = $step_time s, elapsed_time = $elapsed_time s, " *
+            "estimated_remaining_time = $(round(eta, digits=4)) s")
 
         if chi >= bond_dim
             log("Warning: Maximum bond dimension reached at t = $t. Consider increasing bond_dim.")
-            println("Warning: Maximum bond dimension reached at t = $t. Consider increasing bond_dim.")
+        end
+        if total_fidelity < 0.99
+            log("Warning: cumulative truncation error has exceeded 1% (cum_fidelity = " *
+                "$(round(total_fidelity, digits=6))) at t = $t. Dynamics beyond this point " *
+                "should be treated with caution.")
+        end
+
+        if checkpoint_file !== nothing && step % checkpoint_every == 0
+            save_checkpoint(checkpoint_file, psi, step, t, S_EE_vals, F_vals, total_fidelity)
+            log("Checkpoint saved at step $step (t = $t) -> $checkpoint_file")
         end
     end
-    
+
+    if checkpoint_file !== nothing
+        save_checkpoint(checkpoint_file, psi, length(times), times[end], S_EE_vals, F_vals, total_fidelity)
+        log("Final checkpoint saved -> $checkpoint_file")
+    end
+
     log("="^60)
     log("Quench simulation completed: $(now())")
     log("Total time evolution duration: $(round((time() - t_evolution_start)/60, digits=2)) min")
+    log("Final cumulative fidelity estimate: $(round(total_fidelity, digits=6))")
     log("="^60)
 
     if log_io !== nothing

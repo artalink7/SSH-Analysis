@@ -46,19 +46,19 @@ end
 println("Julia threads: $n_julia_threads, BLAS threads: $(BLAS.get_num_threads()), " *
         "Strided threads: $(Strided.get_num_threads())")
 
+# Parameters
+N_sites = 200
+T_max = 20.0
+dt = 0.05
+
 # Paths
 data_dir = joinpath(ProjectRoot(), "data", "quench", "quench_paper")
 log_dir = joinpath(ProjectRoot(), "logs", "quench", "quench_paper")
 ckpt_dir = joinpath(ProjectRoot(), "checkpoints", "quench", "quench_paper")
 mkpath(log_dir)
 mkpath(ckpt_dir)
-log_file = joinpath(log_dir, "quench_from_LL_to_CDW_deltaV1.log")
-checkpoint_file = joinpath(ckpt_dir, "quench_from_LL_to_CDW_deltaV1.h5")
-
-# Parameters
-N_sites = 200
-T_max = 10.0
-dt = 0.05
+log_file = joinpath(log_dir, "quench_from_LL_to_LL_decrease_V_DV02_$(T_max).log")
+checkpoint_file = joinpath(ckpt_dir, "quench_from_LL_to_LL_decrease_V_DV02_$(T_max).h5")
 
 # Bond dim: bumped up from 1700. Ramp this rather than jumping straight to
 # something huge — go up, watch memory in htop/free, confirm it's stable,
@@ -67,11 +67,11 @@ dt = 0.05
 # estimate (N * chi^2 * d), since only the physically populated QN blocks
 # are stored — so don't be scared off by a large dense estimate alone,
 # just verify empirically at your actual filling/parameters.
-bond_dimension = 2400
+bond_dimension = 2000
 cutoff = 1e-8
 
-pre_quench = SSHParams(v=1.0, w=1.0, Δ=0, V=1.5)
-post_quench = SSHParams(v=1.0, w=1.0, Δ=0, V=2.5)
+pre_quench = SSHParams(v=1.0, w=1.0, Δ=0, V=0.7)
+post_quench = SSHParams(v=1.0, w=1.0, Δ=0, V=0.5)
 
 # --- Fresh run with checkpointing enabled ---
 # checkpoint_every=20 steps * dt=0.05 => a checkpoint roughly every 1.0
@@ -94,7 +94,7 @@ times, entropies, variances = simulate_quench(
 # )
 
 df = DataFrame(Time=times, Entropy=entropies, Variance=variances)
-filename = "run_LL_quench_from_LL_to_CDW_200sites_10sec_bonddim$(bond_dimension)_cutoff$(cutoff)_deltaV1.csv"
+filename = "run_LL_quench_from_LL_to_LL_decrease_V_DV02_200sites_time$(T_max)_bonddim$(bond_dimension)_cutoff$(cutoff).csv"
 full_save_path = joinpath(data_dir, filename)
 CSV.write(full_save_path, df)
 println("Quench simulation completed and data saved to $full_save_path")

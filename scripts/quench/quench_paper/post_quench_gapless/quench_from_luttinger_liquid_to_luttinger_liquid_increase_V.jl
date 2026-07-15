@@ -52,8 +52,8 @@ log_dir = joinpath(ProjectRoot(), "logs", "quench", "quench_paper")
 ckpt_dir = joinpath(ProjectRoot(), "checkpoints", "quench", "quench_paper")
 mkpath(log_dir)
 mkpath(ckpt_dir)
-log_file = joinpath(log_dir, "quench_from_LL_to_CDW_deltaV1.log")
-checkpoint_file = joinpath(ckpt_dir, "quench_from_LL_to_CDW_deltaV1.h5")
+log_file = joinpath(log_dir, "quench_from_LL_to_LL_increase_V.log")
+checkpoint_file = joinpath(ckpt_dir, "quench_from_LL_to_LL_increase_V.h5")
 
 # Parameters
 N_sites = 200
@@ -67,11 +67,11 @@ dt = 0.05
 # estimate (N * chi^2 * d), since only the physically populated QN blocks
 # are stored — so don't be scared off by a large dense estimate alone,
 # just verify empirically at your actual filling/parameters.
-bond_dimension = 2400
+bond_dimension = 2000
 cutoff = 1e-8
 
-pre_quench = SSHParams(v=1.0, w=1.0, Δ=0, V=1.5)
-post_quench = SSHParams(v=1.0, w=1.0, Δ=0, V=2.5)
+pre_quench = SSHParams(v=1.0, w=1.0, Δ=0, V=0.5)
+post_quench = SSHParams(v=1.0, w=1.0, Δ=0, V=1.0)
 
 # --- Fresh run with checkpointing enabled ---
 # checkpoint_every=20 steps * dt=0.05 => a checkpoint roughly every 1.0
@@ -94,7 +94,7 @@ times, entropies, variances = simulate_quench(
 # )
 
 df = DataFrame(Time=times, Entropy=entropies, Variance=variances)
-filename = "run_LL_quench_from_LL_to_CDW_200sites_10sec_bonddim$(bond_dimension)_cutoff$(cutoff)_deltaV1.csv"
+filename = "run_LL_quench_from_LL_to_LL_increase_V_200sites_10sec_bonddim$(bond_dimension)_cutoff$(cutoff).csv"
 full_save_path = joinpath(data_dir, filename)
 CSV.write(full_save_path, df)
 println("Quench simulation completed and data saved to $full_save_path")
