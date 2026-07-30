@@ -25,7 +25,9 @@ export GenerateDataEntropy, GenerateDataEntropyEquilibrium,
        ground_energy, correlation_matrix, measure_observables, expect,
        randomMPS, create_CDW_states, run_dmrg_cdw, simulate_quench, DataFrame, CSV,
        ExpectationValue_HamiltonianSub, EnergyFluctuationsEntropy, simulate_quench_initial_disorder,
-       SSHParams
+       SSHParams, single_cut_entropy, bulk_entanglement_entropy, single_cut_spectrum, bulk_spectrum,
+       simulate_quench_only_fluctuations, ExtendedTBParams, simulate_quench_only_fluctuations_tdvp,
+       simulate_quench_only_fluctuations_extended_tebd
 
 include("BlochVectors.jl")
 include("DensityMatrix.jl")
