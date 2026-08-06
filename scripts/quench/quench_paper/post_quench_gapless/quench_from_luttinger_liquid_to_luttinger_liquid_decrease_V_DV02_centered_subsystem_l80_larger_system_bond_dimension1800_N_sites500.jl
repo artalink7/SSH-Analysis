@@ -36,7 +36,7 @@ using ITensors.NDTensors: Strided
 # counts AT CALL TIME and warns if they're not 1 yet. Set them first.
 BLAS.set_num_threads(1)
 Strided.disable_threads()   # equivalent to Strided.set_num_threads(1)
-ITensors.enable_threaded_blocksparse(true)
+ITensors.disable_threaded_blocksparse()
 
 n_julia_threads = Threads.nthreads()
 if n_julia_threads == 1
@@ -47,8 +47,8 @@ println("Julia threads: $n_julia_threads, BLAS threads: $(BLAS.get_num_threads()
         "Strided threads: $(Strided.get_num_threads())")
 
 # Parameters
-N_sites = 400
-T_max = 10.0
+N_sites = 500
+T_max = 8.0
 dt = 0.05
 
 # Paths
@@ -57,8 +57,8 @@ log_dir = joinpath(ProjectRoot(), "logs", "quench", "quench_paper")
 ckpt_dir = joinpath(ProjectRoot(), "checkpoints", "quench", "quench_paper")
 mkpath(log_dir)
 mkpath(ckpt_dir)
-log_file = joinpath(log_dir, "quench_from_LL_to_LL_bd2500_$(N_sites)decrease_V_DV02_$(T_max)_centered_subsystem_l80.log")
-checkpoint_file = joinpath(ckpt_dir, "quench_from_LL_to_LL_bd2500_$(N_sites)_decrease_V_DV02_$(T_max)_centered_subsystem_l80.h5")
+log_file = joinpath(log_dir, "quench_from_LL_to_LL_bd1800_$(N_sites)decrease_V_DV02_$(T_max)_centered_subsystem_l80.log")
+checkpoint_file = joinpath(ckpt_dir, "quench_from_LL_to_LL_bd1800_$(N_sites)_decrease_V_DV02_$(T_max)_centered_subsystem_l80.h5")
 
 # Bond dim: bumped up from 1700. Ramp this rather than jumping straight to
 # something huge — go up, watch memory in htop/free, confirm it's stable,
@@ -67,7 +67,7 @@ checkpoint_file = joinpath(ckpt_dir, "quench_from_LL_to_LL_bd2500_$(N_sites)_dec
 # estimate (N * chi^2 * d), since only the physically populated QN blocks
 # are stored — so don't be scared off by a large dense estimate alone,
 # just verify empirically at your actual filling/parameters.
-bond_dimension = 2500
+bond_dimension = 1800
 cutoff = 1e-10
 
 pre_quench = SSHParams(v=1.0, w=1.0, Δ=0, V=0.7)
@@ -80,7 +80,7 @@ post_quench = SSHParams(v=1.0, w=1.0, Δ=0, V=0.5)
 times, variances = simulate_quench_only_fluctuations(
     N_sites, T_max, dt, pre_quench, post_quench;
     bond_dim=bond_dimension, cutoff=cutoff, logfile=log_file,
-    checkpoint_file=checkpoint_file, checkpoint_every=20, subsystem_a = 161, subsystem_b = 240
+    checkpoint_file=checkpoint_file, checkpoint_every=20, subsystem_a = 211, subsystem_b = 290
 )
 
 # --- Example: resuming a run that stopped or that you want to extend at

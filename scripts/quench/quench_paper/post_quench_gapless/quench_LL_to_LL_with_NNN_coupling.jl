@@ -50,7 +50,7 @@ println("Julia threads: $n_cores, BLAS threads: $(BLAS.get_num_threads()), " *
         "Strided threads: $(Strided.get_num_threads())")
 
 # Parameters
-N_sites = 200
+N_sites = 400
 T_max = 8.0
 dt = 0.05
 
@@ -60,8 +60,8 @@ log_dir = joinpath(ProjectRoot(), "logs", "quench", "quench_paper")
 ckpt_dir = joinpath(ProjectRoot(), "checkpoints", "quench", "quench_paper")
 mkpath(log_dir)
 mkpath(ckpt_dir)
-log_file = joinpath(log_dir, "quench_from_LL_to_LL_NNN_coupling_bd2400_$(N_sites)increase_V_DV02_$(T_max)_centered_subsystem_l40.log")
-checkpoint_file = joinpath(ckpt_dir, "quench_from_LL_to_LL_NNN_coupling_bd2400_$(N_sites)_increase_V_DV02_$(T_max)_centered_subsystem_l40.h5")
+log_file = joinpath(log_dir, "quench_from_LL_to_LL_NNN_coupling_bd2000_$(N_sites)increase_V_DV02_$(T_max)_edge_subsystem_l80.log")
+checkpoint_file = joinpath(ckpt_dir, "quench_from_LL_to_LL_NNN_coupling_bd2000_$(N_sites)_increase_V_DV02_$(T_max)_edge_subsystem_l80.h5")
 
 # Bond dim: bumped up from 1700. Ramp this rather than jumping straight to
 # something huge — go up, watch memory in htop/free, confirm it's stable,
@@ -70,7 +70,7 @@ checkpoint_file = joinpath(ckpt_dir, "quench_from_LL_to_LL_NNN_coupling_bd2400_$
 # estimate (N * chi^2 * d), since only the physically populated QN blocks
 # are stored — so don't be scared off by a large dense estimate alone,
 # just verify empirically at your actual filling/parameters.
-bond_dimension = 2400
+bond_dimension = 2000
 cutoff = 1e-10
 
 pre_quench =  ExtendedTBParams(t0=1.0, t2=0.3, V=0.5)
@@ -83,7 +83,7 @@ post_quench = ExtendedTBParams(t0=1.0, t2=0.3, V=0.7)
 times, variances = simulate_quench_only_fluctuations_extended_tebd(
     N_sites, T_max, dt, pre_quench, post_quench;
     bond_dim=bond_dimension, cutoff=cutoff, logfile=log_file,
-    checkpoint_file=checkpoint_file, checkpoint_every=20, subsystem_a = 81, subsystem_b = 120
+    checkpoint_file=checkpoint_file, checkpoint_every=20, subsystem_a = 1, subsystem_b = 80
 )
 
 # --- Example: resuming a run that stopped or that you want to extend at
@@ -97,7 +97,7 @@ times, variances = simulate_quench_only_fluctuations_extended_tebd(
 # )
 
 df = DataFrame(Time=times, Variance=variances)
-filename = "run_LL_quench_from_LL_to_LL_NNN_coupling_increase_V_DV02_sites$(N_sites)_time$(T_max)_bonddim$(bond_dimension)_cutoff$(cutoff)_centered_subsystem_l40.csv"
+filename = "run_LL_quench_from_LL_to_LL_NNN_coupling_increase_V_DV02_sites$(N_sites)_time$(T_max)_bonddim$(bond_dimension)_cutoff$(cutoff)_edge_subsystem_l80.csv"
 full_save_path = joinpath(data_dir, filename)
 CSV.write(full_save_path, df)
 println("Quench simulation completed and data saved to $full_save_path")

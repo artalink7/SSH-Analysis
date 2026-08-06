@@ -744,3 +744,137 @@ function simulate_quench_only_fluctuations_extended_tebd(N_sites, T_max, dt, pre
     if log_io !== nothing; close(log_io); end
     return times, F_vals
 end
+
+function extract_bipartite_fluctuations_centered(N_sites::Int, p::ExtendedTBParams; 
+                                                 l_min::Int=5, l_max::Union{Int, Nothing}=nothing,
+                                                 logfile::Union{String, Nothing}=nothing)
+    
+    # Setup logger
+    log_io = logfile === nothing ? nothing : open(logfile, "w")
+    function log_msg(msg)
+        println(msg)
+        if log_io !== nothing
+            println(log_io, msg)
+            flush(log_io)
+        end
+    end
+
+    if l_max === nothing
+        l_max = N_sites - 10 
+    end
+
+    log_msg("="^60)
+    log_msg("Fluctuation measurement started: $(now())")
+    log_msg("N_sites = $N_sites, Subsystem range: l = $l_min to $l_max")
+    log_msg("Parameters: t0=$(p.t0), t2=$(p.t2), V=$(p.V)")
+    log_msg("="^60)
+    
+    # 1. Setup the system
+    sites = siteinds("Fermion", N_sites; conserve_qns=true)
+    H = build_extended_tb_MPO_OBC(sites; p=p)
+    init_state = product_state_Nf(N_sites, N_sites ÷ 2)
+    
+    # 2. Get the ground state
+    log_msg("Running DMRG to obtain the ground state (nsweeps=12)...")
+    t_dmrg_start = time()
+    E0, psi = ground_energy(H, sites; init_state=init_state, nsweeps=12)
+    
+    log_msg("DMRG completed in $(round(time() - t_dmrg_start, digits=2)) seconds.")
+    log_msg("Ground state energy: $E0")
+    log_msg("Final ground state max bond dimension: $(maxlinkdim(psi))")
+    log_msg("-"^60)
+    
+    # 3. Measure fluctuations
+    log_msg("Measuring bipartite charge fluctuations for centered subsystems...")
+    l_vals = Int[]
+    F_vals = Float64[]
+    
+    t_measure_start = time()
+    for l in l_min:l_max
+        a = div(N_sites - l, 2) + 1
+        b = a + l - 1
+        
+        # Pass p.V so measure_F knows whether to use the interacting or non-interacting observable
+        F = measure_F(psi, N_sites, p.V; a=a, b=b)
+        push!(l_vals, l)
+        push!(F_vals, F)
+        
+        # Log progress per length
+        log_msg("  -> subsystem length l = $l (sites $a to $b): F = $(round(F, digits=6))")
+    end
+    
+    log_msg("-"^60)
+    log_msg("Measurement completed in $(round(time() - t_measure_start, digits=2)) seconds.")
+    log_msg("="^60)
+    
+    if log_io !== nothing
+        close(log_io)
+    end
+    
+    return l_vals, F_vals
+end
+
+function extract_bipartite_fluctuations_edge(N_sites::Int, p::ExtendedTBParams; 
+                                             l_min::Int=5, l_max::Union{Int, Nothing}=nothing,
+                                             logfile::Union{String, Nothing}=nothing)
+    
+    # Setup logger
+    log_io = logfile === nothing ? nothing : open(logfile, "w")
+    function log_msg(msg)
+        println(msg)
+        if log_io !== nothing
+            println(log_io, msg)
+            flush(log_io)
+        end
+    end
+
+    # For an edge subsystem, we measure up to the middle of the chain
+    if l_max === nothing
+        l_max = N_sites ÷ 2 
+    end
+
+    log_msg("="^60)
+    log_msg("Fluctuation measurement started (EDGE SUBSYSTEM): $(now())")
+    log_msg("N_sites = $N_sites, Subsystem range: l = $l_min to $l_max")
+    log_msg("Parameters: t0=$(p.t0), t2=$(p.t2), V=$(p.V)")
+    log_msg("="^60)
+    
+    sites = siteinds("Fermion", N_sites; conserve_qns=true)
+    H = build_extended_tb_MPO_OBC(sites; p=p)
+    init_state = product_state_Nf(N_sites, N_sites ÷ 2)
+    
+    log_msg("Running DMRG to obtain the ground state (nsweeps=12)...")
+    t_dmrg_start = time()
+    E0, psi = ground_energy(H, sites; init_state=init_state, nsweeps=12)
+    
+    log_msg("DMRG completed in $(round(time() - t_dmrg_start, digits=2)) seconds.")
+    log_msg("Ground state energy: $E0")
+    log_msg("Final ground state max bond dimension: $(maxlinkdim(psi))")
+    log_msg("-"^60)
+    
+    log_msg("Measuring bipartite charge fluctuations for edge subsystems (1 to l)...")
+    l_vals = Int[]
+    F_vals = Float64[]
+    
+    t_measure_start = time()
+    for l in l_min:l_max
+        a = 1
+        b = l
+        
+        F = measure_F(psi, N_sites, p.V; a=a, b=b)
+        push!(l_vals, l)
+        push!(F_vals, F)
+        
+        log_msg("  -> subsystem length l = $l (sites $a to $b): F = $(round(F, digits=6))")
+    end
+    
+    log_msg("-"^60)
+    log_msg("Measurement completed in $(round(time() - t_measure_start, digits=2)) seconds.")
+    log_msg("="^60)
+    
+    if log_io !== nothing
+        close(log_io)
+    end
+    
+    return l_vals, F_vals
+end

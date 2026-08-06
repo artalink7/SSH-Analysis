@@ -26,8 +26,9 @@ export GenerateDataEntropy, GenerateDataEntropyEquilibrium,
        randomMPS, create_CDW_states, run_dmrg_cdw, simulate_quench, DataFrame, CSV,
        ExpectationValue_HamiltonianSub, EnergyFluctuationsEntropy, simulate_quench_initial_disorder,
        SSHParams, single_cut_entropy, bulk_entanglement_entropy, single_cut_spectrum, bulk_spectrum,
-       simulate_quench_only_fluctuations, ExtendedTBParams, simulate_quench_only_fluctuations_tdvp,
-       simulate_quench_only_fluctuations_extended_tebd
+       simulate_quench_only_fluctuations, ExtendedTBParams,
+       simulate_quench_only_fluctuations_extended_tebd, extract_bipartite_fluctuations_centered,
+       extract_bipartite_fluctuations_edge
 
 include("BlochVectors.jl")
 include("DensityMatrix.jl")
