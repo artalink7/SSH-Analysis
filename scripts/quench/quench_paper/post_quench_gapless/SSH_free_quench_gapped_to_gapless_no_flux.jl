@@ -14,9 +14,9 @@ L_cells = 100
 N_cells = 200      
 
 # Generate Data
-open(data_dir * "/run_SSH_free_quench_gapped_to_gapless_v99999_L100cells_200sec.csv", "w") do file 
+open(data_dir * "/run_SSH_free_quench_gapped_to_gapless_v99999_L100cells_1sec.csv", "w") do file 
     write(file , "Time,Entropy,Variance\n")
-    time = 0:0.1:200
+    time = 0:0.0005:1
     for t in time
         entropy, variance = EntropyandVariance_sub(pre_quench, post_quench, style, L_cells, N_cells, t) 
         write(file, "$t,$entropy,$variance\n")
