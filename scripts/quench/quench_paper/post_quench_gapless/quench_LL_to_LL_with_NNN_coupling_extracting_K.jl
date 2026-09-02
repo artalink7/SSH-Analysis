@@ -27,9 +27,11 @@ println("Julia threads: $n_cores, BLAS threads: $(BLAS.get_num_threads()), " *
         "Strided threads: $(Strided.get_num_threads())")
 
 # --- Parameters ---
-N_sites = 400
+N_sites = 1000
 l_min = 4
-l_max = 200
+l_max = 500
+# --- Physics Parameters ---
+pre_quench = ExtendedTBParams(t0=1.0, t2=0.3, V=0.5)
 
 # --- Paths ---
 # Separated from quench data for better organization
@@ -38,13 +40,10 @@ log_dir = joinpath(ProjectRoot(), "logs", "fluctuations", "quench_paper")
 mkpath(data_dir)
 mkpath(log_dir)
 
-log_file = joinpath(log_dir, "bipartite_fluctuations_N$(N_sites)_l$(l_min)-$(l_max)_V07.log")
-
-# --- Physics Parameters ---
-pre_quench = ExtendedTBParams(t0=1.0, t2=0.3, V=0.7)
+log_file = joinpath(log_dir, "bipartite_fluctuations_N$(N_sites)_l$(l_min)-$(l_max)_V05_t203_NEWGE.log")
 
 # --- Run Calculation ---
-l_pre, F_pre = extract_bipartite_fluctuations_edge(
+l_pre, F_pre = extract_bipartite_fluctuations_centered_new(
     N_sites, 
     pre_quench; 
     l_min=l_min, 
@@ -54,7 +53,7 @@ l_pre, F_pre = extract_bipartite_fluctuations_edge(
 
 # --- Save Data ---
 df_pre = DataFrame(length_sub = l_pre, Variance=F_pre)
-filename = "bipartite_fluctuations_post_quench_N$(N_sites)_l$(l_min)-$(l_max)_V07.csv"
+filename = "bipartite_fluctuations_post_quench_N$(N_sites)_l$(l_min)-$(l_max)_V05_t203_NEWGE.csv"
 full_save_path = joinpath(data_dir, filename)
 
 CSV.write(full_save_path, df_pre)

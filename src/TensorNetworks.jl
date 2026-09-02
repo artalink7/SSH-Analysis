@@ -201,18 +201,34 @@ function product_state_Nf(N::Int, Nf::Int; pattern::Symbol=:alternating)
     return st
 end
 
-function ground_energy(H::MPO, sites; init_state, nsweeps=12)
+function ground_energy(H::MPO, sites; init_state, nsweeps=12,
+                        maxdim::Union{Vector{Int},Nothing}=nothing,
+                        cutoff::Float64=1e-10,
+                        noise::Union{Vector{Float64},Nothing}=nothing,
+                        outputlevel::Int=1)
     # 1. Use randomMPS to break the strict 1,0,1,0 pinning
     psi0 = randomMPS(sites, init_state)
-    
-    # 2. Use the Sweeps object to apply enough noise to allow 
-    # the edge states to tunnel across the chain and symmetrize
+
+    # 2. Build a sweep schedule that actually spans nsweeps -
+    #    no silent repeat-last-value truncation of the ramp.
+    if maxdim === nothing
+        # Ramp up, then hold at a generous ceiling for remaining sweeps.
+        ramp = [50, 100, 200, 400, 800, 1000, 1200, 1500, 1600, 1700, 1900, 2000]
+        maxdim = length(ramp) >= nsweeps ? ramp[1:nsweeps] :
+                 vcat(ramp, fill(ramp[end], nsweeps - length(ramp)))
+    end
+    if noise === nothing
+        ramp = [1E-4, 1E-5, 1E-6, 1E-7]
+        noise = length(ramp) >= nsweeps ? ramp[1:nsweeps] :
+                vcat(ramp, fill(0.0, nsweeps - length(ramp)))
+    end
+
     sweeps = Sweeps(nsweeps)
-    maxdim!(sweeps, 50, 100, 200, 400, 800)
-    cutoff!(sweeps, 1e-10)
-    noise!(sweeps, 1E-4, 1E-5, 1E-6, 1E-7, 0.0) # Slightly higher initial noise
-    
-    energy, psi = dmrg(H, psi0, sweeps; outputlevel=1)
+    maxdim!(sweeps, maxdim...)
+    cutoff!(sweeps, cutoff)
+    noise!(sweeps, noise...)
+
+    energy, psi = dmrg(H, psi0, sweeps; outputlevel=outputlevel)
     return energy, psi
 end
 
@@ -705,7 +721,11 @@ function simulate_quench_only_fluctuations_extended_tebd(N_sites, T_max, dt, pre
         
         H_init = build_extended_tb_MPO_OBC(sites; p=pre)
         init_state = product_state_Nf(N_sites, N_sites ÷ 2)
-        E0, psi = ground_energy(H_init, sites; init_state=init_state, nsweeps=12)
+        sweeps = Sweeps(nsweeps)
+        setmaxdim!(sweeps, maxdim...)
+        setcutoff!(sweeps, cutoff)
+
+        E0, psi = dmrg(H, MPS(sites, init_state), sweeps; observer=obs, outputlevel=0)
         log("Initial Ground State Energy: $E0")
     else
         ckpt = load_checkpoint(resume_from)
@@ -877,4 +897,642 @@ function extract_bipartite_fluctuations_edge(N_sites::Int, p::ExtendedTBParams;
     end
     
     return l_vals, F_vals
+end
+
+using ITensors: AbstractObserver
+
+# --- Custom observer: logs bond dimension, energy, and max truncation error each sweep ---
+mutable struct BondDimObserver <: AbstractObserver
+    log_fn::Function
+    sweep_bonddims::Vector{Int}
+    sweep_energies::Vector{Float64}
+    sweep_maxtrunc::Vector{Float64}
+end
+
+BondDimObserver(log_fn::Function) = BondDimObserver(log_fn, Int[], Float64[], Float64[])
+
+function ITensors.measure!(o::BondDimObserver; kwargs...)
+    # measure! is called after each bond update; we only want to log once per full sweep,
+    # so just accumulate and let the after-sweep hook (checkdone!) print
+    return nothing
+end
+
+function ITensors.checkdone!(o::BondDimObserver; sweep, energy, psi, kwargs...)
+    bd = maxlinkdim(psi)
+    push!(o.sweep_bonddims, bd)
+    push!(o.sweep_energies, energy)
+    o.log_fn("    Sweep $sweep: E = $(round(energy, digits=8)), max bond dim = $bd")
+    return false  # never stop early
+end
+
+function extract_bipartite_fluctuations_edge_new(N_sites::Int, p::ExtendedTBParams; 
+                                             l_min::Int=5, l_max::Union{Int, Nothing}=nothing,
+                                             nsweeps::Int=12,
+                                             maxdim::Union{Vector{Int}, Nothing}=nothing,
+                                             cutoff::Float64=1e-10,
+                                             logfile::Union{String, Nothing}=nothing)
+    # Setup logger
+    log_io = logfile === nothing ? nothing : open(logfile, "w")
+    function log_msg(msg)
+        println(msg)
+        if log_io !== nothing
+            println(log_io, msg)
+            flush(log_io)
+        end
+    end
+
+    if l_max === nothing
+        l_max = N_sites ÷ 2 
+    end
+
+    # Default growth schedule if none given; ramp up to a generous ceiling
+    if maxdim === nothing
+        maxdim = [50, 100, 200, 400, 800, 1000, 1200, 1300, 1400, 1500, 1700, 1800][1:nsweeps]
+    end
+
+    log_msg("="^60)
+    log_msg("Fluctuation measurement started (EDGE SUBSYSTEM): $(now())")
+    log_msg("N_sites = $N_sites, Subsystem range: l = $l_min to $l_max")
+    log_msg("Parameters: t0=$(p.t0), t2=$(p.t2), V=$(p.V)")
+    log_msg("DMRG schedule: nsweeps=$nsweeps, maxdim=$maxdim, cutoff=$cutoff")
+    log_msg("="^60)
+
+    sites = siteinds("Fermion", N_sites; conserve_qns=true)
+    H = build_extended_tb_MPO_OBC(sites; p=p)
+    init_state = product_state_Nf(N_sites, N_sites ÷ 2)
+
+    log_msg("Running DMRG to obtain the ground state...")
+    t_dmrg_start = time()
+
+    obs = BondDimObserver(log_msg)
+    sweeps = Sweeps(nsweeps)
+    setmaxdim!(sweeps, maxdim...)
+    setcutoff!(sweeps, cutoff)
+
+    E0, psi = dmrg(H, MPS(sites, init_state), sweeps; observer=obs, outputlevel=0)
+
+    log_msg("DMRG completed in $(round(time() - t_dmrg_start, digits=2)) seconds.")
+    log_msg("Ground state energy: $E0")
+    log_msg("Final ground state max bond dimension: $(maxlinkdim(psi))")
+    log_msg("Bond dim history: $(obs.sweep_bonddims)")
+
+    # Flag if the last sweep's bond dim is pinned at the cap (truncation likely limiting)
+    if obs.sweep_bonddims[end] >= maxdim[end] - 5
+        log_msg("*** WARNING: final bond dimension is at/near maxdim cap ($(maxdim[end])).")
+        log_msg("*** Consider rerunning with a larger maxdim to check convergence.")
+    end
+    log_msg("-"^60)
+
+    log_msg("Measuring bipartite charge fluctuations for edge subsystems (1 to l)...")
+    l_vals = Int[]
+    F_vals = Float64[]
+    t_measure_start = time()
+    for l in l_min:l_max
+        a = 1
+        b = l
+        F = measure_F(psi, N_sites, p.V; a=a, b=b)
+        push!(l_vals, l)
+        push!(F_vals, F)
+        log_msg("  -> subsystem length l = $l (sites $a to $b): F = $(round(F, digits=6))")
+    end
+    log_msg("-"^60)
+    log_msg("Measurement completed in $(round(time() - t_measure_start, digits=2)) seconds.")
+    log_msg("="^60)
+    if log_io !== nothing
+        close(log_io)
+    end
+    return l_vals, F_vals
+end
+
+function extract_bipartite_fluctuations_centered_new(N_sites::Int, p::ExtendedTBParams; 
+                                                 l_min::Int=5, l_max::Union{Int, Nothing}=nothing,
+                                                 margin::Int=20,
+                                                 nsweeps::Int=12,
+                                                 maxdim::Union{Vector{Int}, Nothing}=nothing,
+                                                 cutoff::Float64=1e-10,
+                                                 logfile::Union{String, Nothing}=nothing)
+    # Setup logger
+    log_io = logfile === nothing ? nothing : open(logfile, "w")
+    function log_msg(msg)
+        println(msg)
+        if log_io !== nothing
+            println(log_io, msg)
+            flush(log_io)
+        end
+    end
+
+    # Keep both subsystem edges at least `margin` sites away from the
+    # physical chain boundaries, so this stays a genuine bulk (two-cut)
+    # measurement rather than drifting back toward an edge-touching one.
+    if l_max === nothing
+        l_max = N_sites - 2*margin
+    end
+
+    # Default growth schedule if none given; ramp up to a generous ceiling.
+    # No noise, deterministic product-state init -- validated recipe.
+    if maxdim === nothing
+        ramp = [50, 100, 200, 400, 800, 1000, 1200, 1300, 1400, 1500, 1700, 1800]
+        maxdim = length(ramp) >= nsweeps ? ramp[1:nsweeps] :
+                 vcat(ramp, fill(ramp[end], nsweeps - length(ramp)))
+    end
+
+    log_msg("="^60)
+    log_msg("Fluctuation measurement started (CENTERED SUBSYSTEM): $(now())")
+    log_msg("N_sites = $N_sites, Subsystem range: l = $l_min to $l_max, margin = $margin")
+    log_msg("Parameters: t0=$(p.t0), t2=$(p.t2), V=$(p.V)")
+    log_msg("DMRG schedule: nsweeps=$nsweeps, maxdim=$maxdim, cutoff=$cutoff")
+    log_msg("="^60)
+
+    # 1. Setup the system
+    sites = siteinds("Fermion", N_sites; conserve_qns=true)
+    H = build_extended_tb_MPO_OBC(sites; p=p)
+    init_state = product_state_Nf(N_sites, N_sites ÷ 2)
+
+    # 2. Get the ground state
+    log_msg("Running DMRG to obtain the ground state...")
+    t_dmrg_start = time()
+
+    obs = BondDimObserver(log_msg)
+    sweeps = Sweeps(nsweeps)
+    setmaxdim!(sweeps, maxdim...)
+    setcutoff!(sweeps, cutoff)
+    # deliberately no noise! call -- validated noise-free recipe
+
+    E0, psi = dmrg(H, MPS(sites, init_state), sweeps; observer=obs, outputlevel=0)
+
+    log_msg("DMRG completed in $(round(time() - t_dmrg_start, digits=2)) seconds.")
+    log_msg("Ground state energy: $E0")
+    log_msg("Final ground state max bond dimension: $(maxlinkdim(psi))")
+    log_msg("Bond dim history: $(obs.sweep_bonddims)")
+    if obs.sweep_bonddims[end] >= maxdim[end] - 5
+        log_msg("*** WARNING: final bond dimension is at/near maxdim cap ($(maxdim[end])).")
+        log_msg("*** Consider rerunning with a larger maxdim to check convergence.")
+    end
+    log_msg("-"^60)
+
+    # 3. Measure fluctuations
+    log_msg("Measuring bipartite charge fluctuations for centered subsystems...")
+    l_vals = Int[]
+    F_vals = Float64[]
+    t_measure_start = time()
+    for l in l_min:l_max
+        a = div(N_sites - l, 2) + 1
+        b = a + l - 1
+        F = measure_F(psi, N_sites, p.V; a=a, b=b)
+        push!(l_vals, l)
+        push!(F_vals, F)
+        log_msg("  -> subsystem length l = $l (sites $a to $b): F = $(round(F, digits=6))")
+    end
+    log_msg("-"^60)
+    log_msg("Measurement completed in $(round(time() - t_measure_start, digits=2)) seconds.")
+    log_msg("="^60)
+    if log_io !== nothing
+        close(log_io)
+    end
+    return l_vals, F_vals
+end
+
+function simulate_quench_only_fluctuations_extended_tebd_new(N_sites, T_max, dt, pre::ExtendedTBParams, post::ExtendedTBParams;
+                          bond_dim=1000, cutoff=1e-8, logfile=nothing,
+                          checkpoint_file=nothing, checkpoint_every=20,
+                          resume_from=nothing,
+                          subsystem_a=1, subsystem_b=N_sites ÷ 2,
+                          gs_nsweeps::Int=12,
+                          gs_maxdim::Union{Vector{Int},Nothing}=nothing,
+                          gs_cutoff::Float64=1e-10)
+
+    log_io = logfile === nothing ? nothing : open(logfile, "w")
+    function log(msg)
+        println(msg)
+        if log_io !== nothing
+            println(log_io, msg)
+            flush(log_io)
+        end
+    end
+
+    log("="^60)
+    log("Quench simulation started: $(now())")
+    log("N_sites = $N_sites, T_max = $T_max, dt = $dt, bond_dim = $bond_dim, cutoff = $cutoff")
+    log("Pre-quench parameters: t0=$(pre.t0), t2=$(pre.t2), V=$(pre.V)")
+    log("Post-quench parameters: t0=$(post.t0), t2=$(post.t2), V=$(post.V)")
+    log("Subsystem for F: sites $subsystem_a:$subsystem_b " *
+        "(touches left edge: $(subsystem_a==1), touches right edge: $(subsystem_b==N_sites))")
+    if resume_from !== nothing
+        log("Resuming from checkpoint: $resume_from")
+    end
+    log("="^60)
+
+    times = 0.0:dt:T_max
+    use_interacting_formula = !iszero(post.V) || !iszero(pre.V)
+
+    local sites, psi, gates
+    F_vals = Float64[]
+    start_step = 1
+    total_fidelity = 1.0
+
+    if resume_from === nothing
+        sites = siteinds("Fermion", N_sites; conserve_qns=true)
+
+        H_init = build_extended_tb_MPO_OBC(sites; p=pre)
+        init_state = product_state_Nf(N_sites, N_sites ÷ 2)
+
+        # Ground-state DMRG schedule -- deterministic init, no noise,
+        # validated recipe (matches exact free-fermion ED to ~1e-4 in K).
+        if gs_maxdim === nothing
+            ramp = [50, 100, 200, 400, 800, 1000, 1200, 1300, 1400, 1500, 1700, 1800]
+            gs_maxdim = length(ramp) >= gs_nsweeps ? ramp[1:gs_nsweeps] :
+                        vcat(ramp, fill(ramp[end], gs_nsweeps - length(ramp)))
+        end
+
+        sweeps = Sweeps(gs_nsweeps)
+        setmaxdim!(sweeps, gs_maxdim...)
+        setcutoff!(sweeps, gs_cutoff)
+        # deliberately no noise! call -- validated noise-free recipe
+
+        obs = BondDimObserver(log)
+        E0, psi = dmrg(H_init, MPS(sites, init_state), sweeps; observer=obs, outputlevel=0)
+
+        log("Initial Ground State Energy: $E0")
+        log("Initial ground state max bond dimension: $(maxlinkdim(psi))")
+        log("Ground-state bond dim history: $(obs.sweep_bonddims)")
+        if obs.sweep_bonddims[end] >= gs_maxdim[end] - 5
+            log("*** WARNING: pre-quench ground state bond dim is at/near maxdim cap ($(gs_maxdim[end])).")
+            log("*** Consider raising gs_maxdim to check convergence.")
+        end
+    else
+        ckpt = load_checkpoint(resume_from)
+        psi = ckpt.psi
+        sites = siteinds(psi)
+        F_vals = ckpt.F_vals
+        total_fidelity = ckpt.total_fidelity
+        start_step = ckpt.step + 1
+        log("Loaded checkpoint at step $(ckpt.step), t = $(ckpt.t)")
+    end
+
+    # Build the gates using your corrected 3-site gate function
+    gates = build_extended_tb_tebd_gates(sites, post; dt=dt)
+
+    for (step, t) in enumerate(times)
+        step < start_step && continue
+        if length(F_vals) < step
+            F = measure_F(psi, N_sites, use_interacting_formula ? 1.0 : 0.0; a=subsystem_a, b=subsystem_b)
+            push!(F_vals, F)
+        end
+
+        psi = apply(gates, psi; cutoff=cutoff, maxdim=bond_dim)
+        norm_before = norm(psi)
+        normalize!(psi)
+        total_fidelity *= norm_before^2
+        chi = maxlinkdim(psi)
+
+        log("t = $(round(t, digits=3)), F = $(round(F_vals[step], digits=4)), χ = $chi / $bond_dim, cum_fidelity = $(round(total_fidelity, digits=6))")
+
+        if checkpoint_file !== nothing && step % checkpoint_every == 0
+            save_checkpoint(checkpoint_file, psi, step, t, Float64[], F_vals, total_fidelity)
+            log("Checkpoint saved at step $step")
+        end
+    end
+
+    if log_io !== nothing; close(log_io); end
+    return times, F_vals
+end
+
+function simulate_quench_only_fluctuations_new(N_sites, T_max, dt, pre::SSHParams, post::SSHParams;
+                          bond_dim=1000, cutoff=1e-8, logfile=nothing,
+                          checkpoint_file=nothing, checkpoint_every=20,
+                          resume_from=nothing, 
+                          subsystem_a=1, subsystem_b=N_sites ÷ 2,
+                          gs_nsweeps::Int=12,
+                          gs_maxdim::Union{Vector{Int},Nothing}=nothing,
+                          gs_cutoff::Float64=1e-10)
+
+    log_io = logfile === nothing ? nothing : open(logfile, "w")
+    function log(msg)
+        println(msg)
+        if log_io !== nothing
+            println(log_io, msg)
+            flush(log_io)
+        end
+    end
+
+    log("="^60)
+    log("Quench simulation started: $(now())")
+    log("N_sites = $N_sites, T_max = $T_max, dt = $dt, bond_dim = $bond_dim, cutoff = $cutoff")
+    log("Pre-quench parameters: v=$(pre.v), w=$(pre.w), Δ=$(pre.Δ), V=$(pre.V)")
+    log("Post-quench parameters: v=$(post.v), w=$(post.w), Δ=$(post.Δ), V=$(post.V)")
+    log("Subsystem for F: sites $subsystem_a:$subsystem_b " *
+        "(touches left edge: $(subsystem_a==1), touches right edge: $(subsystem_b==N_sites))")
+    if resume_from !== nothing
+        log("Resuming from checkpoint: $resume_from")
+    end
+    log("="^60)
+
+    times = 0.0:dt:T_max
+    use_interacting_formula = !iszero(post.V) || !iszero(pre.V)
+
+    local sites, psi, gates
+    S_EE_vals = Float64[]   # kept for compatibility, not used in this simulation
+    F_vals = Float64[]
+    start_step = 1
+    total_fidelity = 1.0
+
+    if resume_from === nothing
+        # --- Fresh start: build sites and ground state using a robust DMRG schedule ---
+        sites = siteinds("Fermion", N_sites; conserve_qns=true)
+
+        H_init = build_SSH_MPO_OBC(sites; p=pre)
+        init_state = product_state_Nf(N_sites, N_sites ÷ 2)
+
+        # Ground-state DMRG schedule -- deterministic init, no noise,
+        # validated recipe (matches exact free-fermion ED to ~1e-4 in K).
+        if gs_maxdim === nothing
+            ramp = [50, 100, 200, 400, 800, 1000, 1200, 1300, 1400, 1500, 1700, 1800]
+            gs_maxdim = length(ramp) >= gs_nsweeps ? ramp[1:gs_nsweeps] :
+                        vcat(ramp, fill(ramp[end], gs_nsweeps - length(ramp)))
+        end
+
+        sweeps = Sweeps(gs_nsweeps)
+        setmaxdim!(sweeps, gs_maxdim...)
+        setcutoff!(sweeps, gs_cutoff)
+        # deliberately no noise! – validated noise‑free recipe
+
+        obs = BondDimObserver(log)
+        t_dmrg_start = time()
+        E0, psi = dmrg(H_init, MPS(sites, init_state), sweeps; observer=obs, outputlevel=0)
+        dmrg_time = round(time() - t_dmrg_start, digits=2)
+
+        log("Initial Ground State Energy: $E0 (DMRG took $dmrg_time seconds)")
+        log("Initial ground state max bond dimension: $(maxlinkdim(psi))")
+        log("Ground-state bond dim history: $(obs.sweep_bonddims)")
+        if obs.sweep_bonddims[end] >= gs_maxdim[end] - 5
+            log("*** WARNING: pre-quench ground state bond dim is at/near maxdim cap ($(gs_maxdim[end])).")
+            log("*** Consider raising gs_maxdim to check convergence.")
+        end
+
+    else
+        # --- Resume: load state and history from checkpoint ---
+        ckpt = load_checkpoint(resume_from)
+        psi = ckpt.psi
+        sites = siteinds(psi)
+        S_EE_vals = ckpt.S_EE_vals
+        F_vals = ckpt.F_vals
+        total_fidelity = ckpt.total_fidelity
+        start_step = ckpt.step + 1
+        log("Loaded checkpoint at step $(ckpt.step), t = $(ckpt.t), " *
+            "cumulative fidelity so far = $(round(total_fidelity, digits=6))")
+    end
+
+    # Build the TEBD gates for the post‑quench Hamiltonian
+    log("Constructing TEBD gates for quench (post-resume bond_dim=$bond_dim, cutoff=$cutoff)...")
+    gates = build_tebd_gates(sites, post; dt=dt)
+
+    log("Starting time evolution...")
+    t_evolution_start = time()
+
+    for (step, t) in enumerate(times)
+        step < start_step && continue  # skip steps already done before the checkpoint
+
+        if step >= start_step && length(F_vals) < step
+            # only measure if we don't already have this step's values from a checkpoint
+            F = measure_F(psi, N_sites, use_interacting_formula ? 1.0 : 0.0; 
+                                            a=subsystem_a, b=subsystem_b)
+            push!(F_vals, F)
+        else
+            F = F_vals[step]
+        end
+
+        step_start = time()
+
+        psi = apply(gates, psi; cutoff=cutoff, maxdim=bond_dim)
+        norm_before = norm(psi)          # truncation‑error diagnostic
+        normalize!(psi)
+        step_time = round(time() - step_start, digits=4)
+
+        # Cumulative fidelity estimate: since the gates are unitary, any norm
+        # loss at this step is purely truncation. norm_before^2 approximates
+        # the fraction of weight kept at this step; multiplying across steps
+        # gives a running lower‑bound‑ish estimate of overlap with the exact
+        # (untruncated) state.
+        total_fidelity *= norm_before^2
+
+        chi = maxlinkdim(psi)
+        elapsed_time = round(time() - t_evolution_start, digits=4)
+        eta = (elapsed_time / (step - start_step + 1)) * (length(times) - step)
+
+        log("t = $(round(t, digits=3)), " *
+            "F = $(round(F, digits=4)), χ = $chi / $bond_dim, " *
+            "norm_before = $(round(norm_before, digits=8)), " *
+            "cum_fidelity = $(round(total_fidelity, digits=6)), " *
+            "step_time = $step_time s, elapsed_time = $elapsed_time s, " *
+            "estimated_remaining_time = $(round(eta, digits=4)) s")
+
+        if chi >= bond_dim
+            log("Warning: Maximum bond dimension reached at t = $t. Consider increasing bond_dim.")
+        end
+        if total_fidelity < 0.99
+            log("Warning: cumulative truncation error has exceeded 1% (cum_fidelity = " *
+                "$(round(total_fidelity, digits=6))) at t = $t. Dynamics beyond this point " *
+                "should be treated with caution.")
+        end
+
+        if checkpoint_file !== nothing && step % checkpoint_every == 0
+            save_checkpoint(checkpoint_file, psi, step, t, S_EE_vals, F_vals, total_fidelity)
+            log("Checkpoint saved at step $step (t = $t) -> $checkpoint_file")
+        end
+    end
+
+    if checkpoint_file !== nothing
+        save_checkpoint(checkpoint_file, psi, length(times), times[end], S_EE_vals, F_vals, total_fidelity)
+        log("Final checkpoint saved -> $checkpoint_file")
+    end
+
+    log("="^60)
+    log("Quench simulation completed: $(now())")
+    log("Total time evolution duration: $(round((time() - t_evolution_start)/60, digits=2)) min")
+    log("Final cumulative fidelity estimate: $(round(total_fidelity, digits=6))")
+    log("="^60)
+
+    if log_io !== nothing
+        close(log_io)
+    end
+
+    return times, F_vals
+end
+
+function check_ground_state_quality(psi::MPS, H::MPO, E0::Float64, N_expected::Int;
+                                     variance_cutoff::Float64=1e-12,
+                                     variance_maxdim::Union{Int,Nothing}=nothing,
+                                     log_fn::Function=println)
+    # 1. Particle number: sanity check on MPS/site-index construction only --
+    #    NOT a test of ground-state convergence. conserve_qns=true makes this
+    #    exact by construction regardless of whether DMRG actually found the
+    #    ground state; a mismatch here would flag a bug elsewhere, not
+    #    non-convergence.
+    N_tot = real(sum(expect(psi, "N")))
+    log_fn("  Total particle number: $N_tot (expected: $N_expected, diff: $(abs(N_tot-N_expected)))")
+
+    # 2. Energy variance <H^2> - <H>^2. This IS a genuine eigenstate-quality
+    #    test: should be ~0 (up to truncation error from the one apply(H,psi)
+    #    below) for a true eigenstate. Nonzero variance flags non-convergence
+    #    or excited-state contamination.
+    vm = variance_maxdim === nothing ? 4 * maxlinkdim(psi) : variance_maxdim
+    Hpsi = apply(H, psi; cutoff=variance_cutoff, maxdim=vm)
+    E2 = real(inner(Hpsi, Hpsi))
+    variance = E2 - E0^2
+    log_fn("  Energy variance <H^2>-<H>^2 = $variance (should be ~0 for a true eigenstate)")
+
+    return (N_tot=N_tot, variance=variance)
+end
+
+using HDF5
+
+function compute_and_save_ground_state(N_sites::Int, p::ExtendedTBParams, savefile::String;
+                                        nsweeps::Int=12,
+                                        maxdim::Union{Vector{Int},Nothing}=nothing,
+                                        cutoff::Float64=1e-10,
+                                        logfile::Union{String,Nothing}=nothing)
+    log_io = logfile === nothing ? nothing : open(logfile, "w")
+    function log(msg)
+        println(msg)
+        if log_io !== nothing
+            println(log_io, msg); flush(log_io)
+        end
+    end
+
+    log("="^60)
+    log("Ground state computation started: $(now())")
+    log("N_sites = $N_sites, t0=$(p.t0), t2=$(p.t2), V=$(p.V)")
+    log("="^60)
+
+    sites = siteinds("Fermion", N_sites; conserve_qns=true)
+    H = build_extended_tb_MPO_OBC(sites; p=p)
+    N_fill = N_sites ÷ 2
+    init_state = product_state_Nf(N_sites, N_fill)
+
+    if maxdim === nothing
+        ramp = [50, 100, 200, 400, 800, 1000, 1200, 1300, 1400, 1500, 1700, 1800]
+        maxdim = length(ramp) >= nsweeps ? ramp[1:nsweeps] :
+                 vcat(ramp, fill(ramp[end], nsweeps - length(ramp)))
+    end
+
+    sweeps = Sweeps(nsweeps)
+    setmaxdim!(sweeps, maxdim...)
+    setcutoff!(sweeps, cutoff)
+    # deliberately no noise! call -- validated noise-free recipe
+
+    obs = BondDimObserver(log)
+    E0, psi = dmrg(H, MPS(sites, init_state), sweeps; observer=obs, outputlevel=0)
+
+    log("DMRG completed. Ground state energy: $E0")
+    log("Final bond dimension: $(maxlinkdim(psi))")
+    log("Bond dim history: $(obs.sweep_bonddims)")
+    if obs.sweep_bonddims[end] >= maxdim[end] - 5
+        log("*** WARNING: final bond dimension at/near maxdim cap ($(maxdim[end])).")
+    end
+
+    log("-"^60)
+    log("Ground state quality checks:")
+    quality = check_ground_state_quality(psi, H, E0, N_fill; log_fn=log)
+
+    n_profile = real.(expect(psi, "N"))
+    mirror_diff = maximum(abs.(n_profile .- reverse(n_profile)))
+    log("  Max density mirror-symmetry violation: $mirror_diff")
+    log("-"^60)
+
+    h5open(savefile, "w") do f
+        write(f, "psi", psi)
+        write(f, "E0", E0)
+        write(f, "N_sites", N_sites)
+        write(f, "t0", p.t0)
+        write(f, "t2", p.t2)
+        write(f, "V", p.V)
+    end
+    log("Ground state saved to $savefile")
+    log("="^60)
+
+    if log_io !== nothing; close(log_io); end
+    return E0, psi, quality
+end
+
+function load_ground_state(savefile::String)
+    local psi, E0, N_sites, t0, t2, V
+    h5open(savefile, "r") do f
+        psi = read(f, "psi", MPS)
+        E0 = read(f, "E0")
+        N_sites = read(f, "N_sites")
+        t0 = read(f, "t0")
+        t2 = read(f, "t2")
+        V = read(f, "V")
+    end
+    return psi, E0, N_sites, ExtendedTBParams(t0=t0, t2=t2, V=V)
+end
+
+function evolve_from_ground_state(savefile::String, T_max, dt, post::ExtendedTBParams;
+                                   bond_dim=1000, cutoff=1e-8, logfile=nothing,
+                                   checkpoint_file=nothing, checkpoint_every=20,
+                                   resume_from=nothing,
+                                   subsystem_a=1, subsystem_b=nothing)
+    log_io = logfile === nothing ? nothing : open(logfile, "w")
+    function log(msg)
+        println(msg)
+        if log_io !== nothing
+            println(log_io, msg); flush(log_io)
+        end
+    end
+
+    times = 0.0:dt:T_max
+    F_vals = Float64[]
+    start_step = 1
+    total_fidelity = 1.0
+    local psi, sites
+
+    if resume_from === nothing
+        psi, E0, N_sites, pre = load_ground_state(savefile)
+        sites = siteinds(psi)
+        subsystem_b = subsystem_b === nothing ? N_sites ÷ 2 : subsystem_b
+
+        log("="^60)
+        log("Quench started from saved ground state: $(now())")
+        log("Loaded from $savefile (E0=$E0, pre: t0=$(pre.t0), t2=$(pre.t2), V=$(pre.V))")
+        log("Post-quench: t0=$(post.t0), t2=$(post.t2), V=$(post.V)")
+        log("Subsystem for F: sites $subsystem_a:$subsystem_b")
+        log("="^60)
+    else
+        ckpt = load_checkpoint(resume_from)
+        psi = ckpt.psi
+        sites = siteinds(psi)
+        F_vals = ckpt.F_vals
+        total_fidelity = ckpt.total_fidelity
+        start_step = ckpt.step + 1
+        log("Resuming from checkpoint: $resume_from at step $(ckpt.step)")
+    end
+
+    use_interacting_formula = !iszero(post.V)
+    gates = build_extended_tb_tebd_gates(sites, post; dt=dt)
+
+    for (step, t) in enumerate(times)
+        step < start_step && continue
+        if length(F_vals) < step
+            F = measure_F(psi, length(sites), use_interacting_formula ? post.V : 0.0;
+                           a=subsystem_a, b=subsystem_b)
+            push!(F_vals, F)
+        end
+
+        psi = apply(gates, psi; cutoff=cutoff, maxdim=bond_dim)
+        norm_before = norm(psi)
+        normalize!(psi)
+        total_fidelity *= norm_before^2
+        chi = maxlinkdim(psi)
+
+        log("t = $(round(t, digits=3)), F = $(round(F_vals[step], digits=4)), " *
+            "χ = $chi / $bond_dim, cum_fidelity = $(round(total_fidelity, digits=6))")
+
+        if checkpoint_file !== nothing && step % checkpoint_every == 0
+            save_checkpoint(checkpoint_file, psi, step, t, Float64[], F_vals, total_fidelity)
+            log("Checkpoint saved at step $step")
+        end
+    end
+
+    if log_io !== nothing; close(log_io); end
+    return times, F_vals
 end

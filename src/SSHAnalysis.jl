@@ -28,7 +28,9 @@ export GenerateDataEntropy, GenerateDataEntropyEquilibrium,
        SSHParams, single_cut_entropy, bulk_entanglement_entropy, single_cut_spectrum, bulk_spectrum,
        simulate_quench_only_fluctuations, ExtendedTBParams,
        simulate_quench_only_fluctuations_extended_tebd, extract_bipartite_fluctuations_centered,
-       extract_bipartite_fluctuations_edge
+       extract_bipartite_fluctuations_edge, extract_bipartite_fluctuations_edge_new,
+       simulate_quench_only_fluctuations_extended_tebd_new, extract_bipartite_fluctuations_centered_new,
+       simulate_quench_only_fluctuations_new, compute_and_save_ground_state, evolve_from_ground_state
 
 include("BlochVectors.jl")
 include("DensityMatrix.jl")
