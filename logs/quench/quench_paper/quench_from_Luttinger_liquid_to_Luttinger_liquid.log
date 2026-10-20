@@ -1,0 +1,291 @@
+============================================================
+Quench simulation started: 2026-07-03T11:25:36.815
+N_sites = 200, T_max = 10.0, dt = 0.05, bond_dim = 1500
+Pre-quench parameters: v=1.0, w=1.0, Δ=0.0, V=0.5
+Post-quench parameters: v=1.0, w=1.0, Δ=0.0, V=1.0
+============================================================
+Preparing interacting ground state (t < 0)...
+Initial Ground State Energy: -162.59723088758437 (DMRG took 76.05 seconds)
+Initial max bond dimension: 166
+Constructing TEBD gates for quench...
+Starting time evolution...
+t = 0.0, S_EE = 1.1276, F = 0.3122, χ = 148 / 1500, step_time = 19.1893 s, elapsed_time = 23.3649 s, estimated_remaining_time = 4672.98 s
+t = 0.05, S_EE = 1.1277, F = 0.3121, χ = 140 / 1500, step_time = 1.7753 s, elapsed_time = 30.719 s, estimated_remaining_time = 3056.5405 s
+t = 0.1, S_EE = 1.1281, F = 0.3117, χ = 135 / 1500, step_time = 1.7825 s, elapsed_time = 34.0912 s, estimated_remaining_time = 2250.0192 s
+t = 0.15, S_EE = 1.1286, F = 0.311, χ = 133 / 1500, step_time = 1.4238 s, elapsed_time = 37.056 s, estimated_remaining_time = 1825.008 s
+t = 0.2, S_EE = 1.1292, F = 0.3102, χ = 131 / 1500, step_time = 1.3889 s, elapsed_time = 40.2534 s, estimated_remaining_time = 1577.9333 s
+t = 0.25, S_EE = 1.13, F = 0.3091, χ = 129 / 1500, step_time = 1.3385 s, elapsed_time = 43.3783 s, estimated_remaining_time = 1409.7948 s
+t = 0.3, S_EE = 1.1308, F = 0.3079, χ = 128 / 1500, step_time = 1.6586 s, elapsed_time = 46.5327 s, estimated_remaining_time = 1289.6205 s
+t = 0.35, S_EE = 1.1315, F = 0.3066, χ = 128 / 1500, step_time = 1.3371 s, elapsed_time = 49.3215 s, estimated_remaining_time = 1189.8812 s
+t = 0.4, S_EE = 1.1323, F = 0.3052, χ = 128 / 1500, step_time = 1.3409 s, elapsed_time = 52.3946 s, estimated_remaining_time = 1117.7515 s
+t = 0.45, S_EE = 1.133, F = 0.3038, χ = 128 / 1500, step_time = 1.2196 s, elapsed_time = 55.4587 s, estimated_remaining_time = 1059.2612 s
+t = 0.5, S_EE = 1.1337, F = 0.3025, χ = 128 / 1500, step_time = 1.6921 s, elapsed_time = 58.6353 s, estimated_remaining_time = 1012.7915 s
+t = 0.55, S_EE = 1.1344, F = 0.3012, χ = 128 / 1500, step_time = 1.3416 s, elapsed_time = 61.3726 s, estimated_remaining_time = 966.6184 s
+t = 0.6, S_EE = 1.1351, F = 0.3, χ = 130 / 1500, step_time = 1.3526 s, elapsed_time = 64.4681 s, estimated_remaining_time = 932.3079 s
+t = 0.65, S_EE = 1.1358, F = 0.299, χ = 130 / 1500, step_time = 1.6786 s, elapsed_time = 67.7506 s, estimated_remaining_time = 904.9544 s
+t = 0.7, S_EE = 1.1366, F = 0.2981, χ = 131 / 1500, step_time = 1.7911 s, elapsed_time = 71.0327 s, estimated_remaining_time = 880.8055 s
+t = 0.75, S_EE = 1.1373, F = 0.2973, χ = 132 / 1500, step_time = 1.3886 s, elapsed_time = 73.8738 s, estimated_remaining_time = 854.1658 s
+t = 0.8, S_EE = 1.1381, F = 0.2967, χ = 133 / 1500, step_time = 1.4618 s, elapsed_time = 77.1369 s, estimated_remaining_time = 834.8935 s
+t = 0.85, S_EE = 1.1389, F = 0.2962, χ = 134 / 1500, step_time = 1.7568 s, elapsed_time = 80.4668 s, estimated_remaining_time = 818.0791 s
+t = 0.9, S_EE = 1.1398, F = 0.2959, χ = 135 / 1500, step_time = 1.8233 s, elapsed_time = 83.916 s, estimated_remaining_time = 803.8269 s
+t = 0.95, S_EE = 1.1406, F = 0.2956, χ = 136 / 1500, step_time = 1.5049 s, elapsed_time = 87.0705 s, estimated_remaining_time = 787.988 s
+t = 1.0, S_EE = 1.1415, F = 0.2955, χ = 137 / 1500, step_time = 1.5139 s, elapsed_time = 90.5047 s, estimated_remaining_time = 775.7546 s
+t = 1.05, S_EE = 1.1425, F = 0.2954, χ = 138 / 1500, step_time = 1.5764 s, elapsed_time = 94.0217 s, estimated_remaining_time = 764.9947 s
+t = 1.1, S_EE = 1.1434, F = 0.2953, χ = 140 / 1500, step_time = 1.8184 s, elapsed_time = 98.2156 s, estimated_remaining_time = 760.1033 s
+t = 1.15, S_EE = 1.1444, F = 0.2953, χ = 142 / 1500, step_time = 1.542 s, elapsed_time = 102.0672 s, estimated_remaining_time = 752.7456 s
+t = 1.2, S_EE = 1.1455, F = 0.2953, χ = 143 / 1500, step_time = 2.4037 s, elapsed_time = 106.2265 s, estimated_remaining_time = 747.8346 s
+t = 1.25, S_EE = 1.1466, F = 0.2953, χ = 145 / 1500, step_time = 1.9662 s, elapsed_time = 110.1723 s, estimated_remaining_time = 741.5443 s
+t = 1.3, S_EE = 1.1477, F = 0.2952, χ = 147 / 1500, step_time = 2.2351 s, elapsed_time = 114.274 s, estimated_remaining_time = 736.4324 s
+t = 1.35, S_EE = 1.1489, F = 0.2951, χ = 149 / 1500, step_time = 2.6357 s, elapsed_time = 118.8651 s, estimated_remaining_time = 734.4165 s
+t = 1.4, S_EE = 1.1501, F = 0.295, χ = 151 / 1500, step_time = 2.1266 s, elapsed_time = 123.0404 s, estimated_remaining_time = 729.7569 s
+t = 1.45, S_EE = 1.1513, F = 0.2948, χ = 154 / 1500, step_time = 2.2965 s, elapsed_time = 127.605 s, estimated_remaining_time = 727.3485 s
+t = 1.5, S_EE = 1.1525, F = 0.2946, χ = 157 / 1500, step_time = 2.3262 s, elapsed_time = 132.2936 s, estimated_remaining_time = 725.481 s
+t = 1.55, S_EE = 1.1538, F = 0.2944, χ = 160 / 1500, step_time = 2.2494 s, elapsed_time = 136.9595 s, estimated_remaining_time = 723.3174 s
+t = 1.6, S_EE = 1.155, F = 0.2941, χ = 164 / 1500, step_time = 2.0823 s, elapsed_time = 141.7663 s, estimated_remaining_time = 721.7193 s
+t = 1.65, S_EE = 1.1563, F = 0.2939, χ = 167 / 1500, step_time = 2.5201 s, elapsed_time = 146.9067 s, estimated_remaining_time = 721.5711 s
+t = 1.7, S_EE = 1.1576, F = 0.2936, χ = 170 / 1500, step_time = 2.6357 s, elapsed_time = 152.218 s, estimated_remaining_time = 721.9482 s
+t = 1.75, S_EE = 1.1588, F = 0.2934, χ = 173 / 1500, step_time = 3.9201 s, elapsed_time = 159.4139 s, estimated_remaining_time = 730.647 s
+t = 1.8, S_EE = 1.1601, F = 0.2932, χ = 176 / 1500, step_time = 2.6249 s, elapsed_time = 164.5141 s, estimated_remaining_time = 729.1976 s
+t = 1.85, S_EE = 1.1613, F = 0.2929, χ = 179 / 1500, step_time = 3.2932 s, elapsed_time = 170.8068 s, estimated_remaining_time = 732.6713 s
+t = 1.9, S_EE = 1.1625, F = 0.2927, χ = 183 / 1500, step_time = 2.8937 s, elapsed_time = 176.4588 s, estimated_remaining_time = 732.9827 s
+t = 1.95, S_EE = 1.1638, F = 0.2926, χ = 188 / 1500, step_time = 3.1155 s, elapsed_time = 182.4971 s, estimated_remaining_time = 734.5508 s
+t = 2.0, S_EE = 1.165, F = 0.2924, χ = 192 / 1500, step_time = 3.4136 s, elapsed_time = 188.9163 s, estimated_remaining_time = 737.2343 s
+t = 2.05, S_EE = 1.1662, F = 0.2923, χ = 197 / 1500, step_time = 3.4378 s, elapsed_time = 195.4802 s, estimated_remaining_time = 740.0322 s
+t = 2.1, S_EE = 1.1674, F = 0.2922, χ = 201 / 1500, step_time = 3.3829 s, elapsed_time = 202.2291 s, estimated_remaining_time = 743.0744 s
+t = 2.15, S_EE = 1.1687, F = 0.2921, χ = 205 / 1500, step_time = 3.5241 s, elapsed_time = 209.2001 s, estimated_remaining_time = 746.464 s
+t = 2.2, S_EE = 1.1699, F = 0.292, χ = 209 / 1500, step_time = 3.9399 s, elapsed_time = 216.6683 s, estimated_remaining_time = 751.1168 s
+t = 2.25, S_EE = 1.1712, F = 0.2919, χ = 214 / 1500, step_time = 3.6954 s, elapsed_time = 224.6133 s, estimated_remaining_time = 756.8492 s
+t = 2.3, S_EE = 1.1724, F = 0.2919, χ = 218 / 1500, step_time = 4.5999 s, elapsed_time = 232.4553 s, estimated_remaining_time = 761.662 s
+t = 2.35, S_EE = 1.1737, F = 0.2918, χ = 223 / 1500, step_time = 4.6245 s, elapsed_time = 241.2354 s, estimated_remaining_time = 768.9378 s
+t = 2.4, S_EE = 1.175, F = 0.2917, χ = 228 / 1500, step_time = 4.7114 s, elapsed_time = 250.3258 s, estimated_remaining_time = 776.5208 s
+t = 2.45, S_EE = 1.1763, F = 0.2917, χ = 233 / 1500, step_time = 4.8144 s, elapsed_time = 259.3968 s, estimated_remaining_time = 783.3783 s
+t = 2.5, S_EE = 1.1776, F = 0.2916, χ = 239 / 1500, step_time = 4.1407 s, elapsed_time = 267.8795 s, estimated_remaining_time = 787.8809 s
+t = 2.55, S_EE = 1.1789, F = 0.2915, χ = 246 / 1500, step_time = 5.7701 s, elapsed_time = 277.9213 s, estimated_remaining_time = 796.3514 s
+t = 2.6, S_EE = 1.1802, F = 0.2915, χ = 252 / 1500, step_time = 4.8564 s, elapsed_time = 287.2657 s, estimated_remaining_time = 802.1759 s
+t = 2.65, S_EE = 1.1815, F = 0.2914, χ = 259 / 1500, step_time = 5.925 s, elapsed_time = 297.9844 s, estimated_remaining_time = 811.1798 s
+t = 2.7, S_EE = 1.1829, F = 0.2913, χ = 265 / 1500, step_time = 5.6756 s, elapsed_time = 308.9806 s, estimated_remaining_time = 820.203 s
+t = 2.75, S_EE = 1.1842, F = 0.2912, χ = 271 / 1500, step_time = 6.1462 s, elapsed_time = 320.0807 s, estimated_remaining_time = 828.7804 s
+t = 2.8, S_EE = 1.1855, F = 0.2911, χ = 278 / 1500, step_time = 6.5119 s, elapsed_time = 333.2306 s, estimated_remaining_time = 841.8457 s
+t = 2.85, S_EE = 1.1868, F = 0.291, χ = 285 / 1500, step_time = 6.252 s, elapsed_time = 345.538 s, estimated_remaining_time = 851.9299 s
+t = 2.9, S_EE = 1.1882, F = 0.2909, χ = 291 / 1500, step_time = 6.1989 s, elapsed_time = 357.0352 s, estimated_remaining_time = 859.3051 s
+t = 2.95, S_EE = 1.1895, F = 0.2908, χ = 298 / 1500, step_time = 6.7634 s, elapsed_time = 369.6275 s, estimated_remaining_time = 868.6246 s
+t = 3.0, S_EE = 1.1908, F = 0.2907, χ = 305 / 1500, step_time = 7.0456 s, elapsed_time = 382.8191 s, estimated_remaining_time = 878.6012 s
+t = 3.05, S_EE = 1.1921, F = 0.2906, χ = 312 / 1500, step_time = 7.6232 s, elapsed_time = 396.6717 s, estimated_remaining_time = 889.3124 s
+t = 3.1, S_EE = 1.1935, F = 0.2905, χ = 320 / 1500, step_time = 8.5112 s, elapsed_time = 413.392 s, estimated_remaining_time = 905.5253 s
+t = 3.15, S_EE = 1.1948, F = 0.2904, χ = 328 / 1500, step_time = 8.1462 s, elapsed_time = 429.3726 s, estimated_remaining_time = 919.1257 s
+t = 3.2, S_EE = 1.1961, F = 0.2903, χ = 336 / 1500, step_time = 8.6741 s, elapsed_time = 446.1978 s, estimated_remaining_time = 933.5831 s
+t = 3.25, S_EE = 1.1974, F = 0.2903, χ = 345 / 1500, step_time = 8.3036 s, elapsed_time = 461.7917 s, estimated_remaining_time = 944.5739 s
+t = 3.3, S_EE = 1.1988, F = 0.2902, χ = 354 / 1500, step_time = 9.4454 s, elapsed_time = 479.1605 s, estimated_remaining_time = 958.321 s
+t = 3.35, S_EE = 1.2001, F = 0.2901, χ = 363 / 1500, step_time = 11.3375 s, elapsed_time = 499.0709 s, estimated_remaining_time = 976.124 s
+t = 3.4, S_EE = 1.2014, F = 0.2901, χ = 372 / 1500, step_time = 9.9654 s, elapsed_time = 518.3493 s, estimated_remaining_time = 991.6247 s
+t = 3.45, S_EE = 1.2028, F = 0.29, χ = 382 / 1500, step_time = 10.4039 s, elapsed_time = 538.4325 s, estimated_remaining_time = 1007.638 s
+t = 3.5, S_EE = 1.2041, F = 0.29, χ = 392 / 1500, step_time = 10.1826 s, elapsed_time = 558.5031 s, estimated_remaining_time = 1022.6113 s
+t = 3.55, S_EE = 1.2054, F = 0.29, χ = 402 / 1500, step_time = 10.6304 s, elapsed_time = 579.3553 s, estimated_remaining_time = 1038.0116 s
+t = 3.6, S_EE = 1.2068, F = 0.2899, χ = 412 / 1500, step_time = 11.1134 s, elapsed_time = 601.3534 s, estimated_remaining_time = 1054.4279 s
+t = 3.65, S_EE = 1.2081, F = 0.2899, χ = 423 / 1500, step_time = 14.3216 s, elapsed_time = 628.788 s, estimated_remaining_time = 1079.1362 s
+t = 3.7, S_EE = 1.2095, F = 0.2898, χ = 433 / 1500, step_time = 13.0381 s, elapsed_time = 653.5181 s, estimated_remaining_time = 1097.9104 s
+t = 3.75, S_EE = 1.2108, F = 0.2898, χ = 444 / 1500, step_time = 12.9151 s, elapsed_time = 678.2093 s, estimated_remaining_time = 1115.4758 s
+t = 3.8, S_EE = 1.2122, F = 0.2897, χ = 454 / 1500, step_time = 13.939 s, elapsed_time = 705.0064 s, estimated_remaining_time = 1135.335 s
+t = 3.85, S_EE = 1.2136, F = 0.2897, χ = 465 / 1500, step_time = 15.3187 s, elapsed_time = 734.2069 s, estimated_remaining_time = 1157.7878 s
+t = 3.9, S_EE = 1.2149, F = 0.2896, χ = 476 / 1500, step_time = 14.5088 s, elapsed_time = 762.9193 s, estimated_remaining_time = 1178.1792 s
+t = 3.95, S_EE = 1.2163, F = 0.2896, χ = 488 / 1500, step_time = 15.4691 s, elapsed_time = 793.5603 s, estimated_remaining_time = 1200.26 s
+t = 4.0, S_EE = 1.2177, F = 0.2895, χ = 500 / 1500, step_time = 17.6389 s, elapsed_time = 826.5445 s, estimated_remaining_time = 1224.5104 s
+t = 4.05, S_EE = 1.219, F = 0.2895, χ = 513 / 1500, step_time = 16.8595 s, elapsed_time = 859.1558 s, estimated_remaining_time = 1246.8237 s
+t = 4.1, S_EE = 1.2204, F = 0.2894, χ = 526 / 1500, step_time = 18.2716 s, elapsed_time = 893.8155 s, estimated_remaining_time = 1270.7257 s
+t = 4.15, S_EE = 1.2217, F = 0.2894, χ = 539 / 1500, step_time = 19.3933 s, elapsed_time = 932.359 s, estimated_remaining_time = 1298.6429 s
+t = 4.2, S_EE = 1.2231, F = 0.2893, χ = 552 / 1500, step_time = 21.1081 s, elapsed_time = 971.6404 s, estimated_remaining_time = 1326.0034 s
+t = 4.25, S_EE = 1.2245, F = 0.2893, χ = 567 / 1500, step_time = 20.7809 s, elapsed_time = 1013.0773 s, estimated_remaining_time = 1354.6964 s
+t = 4.3, S_EE = 1.2258, F = 0.2892, χ = 582 / 1500, step_time = 25.9332 s, elapsed_time = 1059.8465 s, estimated_remaining_time = 1388.7644 s
+t = 4.35, S_EE = 1.2272, F = 0.2892, χ = 597 / 1500, step_time = 22.1698 s, elapsed_time = 1102.7724 s, estimated_remaining_time = 1416.06 s
+t = 4.4, S_EE = 1.2286, F = 0.2891, χ = 612 / 1500, step_time = 22.8205 s, elapsed_time = 1147.0328 s, estimated_remaining_time = 1443.457 s
+t = 4.45, S_EE = 1.2299, F = 0.2891, χ = 627 / 1500, step_time = 23.7348 s, elapsed_time = 1194.0764 s, estimated_remaining_time = 1472.6942 s
+t = 4.5, S_EE = 1.2313, F = 0.289, χ = 643 / 1500, step_time = 26.0734 s, elapsed_time = 1244.4637 s, estimated_remaining_time = 1504.2968 s
+t = 4.55, S_EE = 1.2327, F = 0.289, χ = 658 / 1500, step_time = 28.526 s, elapsed_time = 1298.3962 s, estimated_remaining_time = 1538.3172 s
+t = 4.6, S_EE = 1.234, F = 0.289, χ = 674 / 1500, step_time = 27.2112 s, elapsed_time = 1353.5222 s, estimated_remaining_time = 1571.8322 s
+t = 4.65, S_EE = 1.2354, F = 0.2889, χ = 690 / 1500, step_time = 29.6615 s, elapsed_time = 1412.0089 s, estimated_remaining_time = 1607.2867 s
+t = 4.7, S_EE = 1.2368, F = 0.2889, χ = 706 / 1500, step_time = 31.1484 s, elapsed_time = 1473.2233 s, estimated_remaining_time = 1643.8071 s
+t = 4.75, S_EE = 1.2382, F = 0.2889, χ = 723 / 1500, step_time = 32.9268 s, elapsed_time = 1537.613 s, estimated_remaining_time = 1681.7642 s
+t = 4.8, S_EE = 1.2395, F = 0.2889, χ = 741 / 1500, step_time = 36.0044 s, elapsed_time = 1606.5617 s, estimated_remaining_time = 1722.4991 s
+t = 4.85, S_EE = 1.2409, F = 0.2888, χ = 759 / 1500, step_time = 35.7341 s, elapsed_time = 1677.4408 s, estimated_remaining_time = 1763.0245 s
+t = 4.9, S_EE = 1.2423, F = 0.2888, χ = 777 / 1500, step_time = 40.4702 s, elapsed_time = 1759.4742 s, estimated_remaining_time = 1812.7916 s
+t = 4.95, S_EE = 1.2437, F = 0.2888, χ = 796 / 1500, step_time = 43.5398 s, elapsed_time = 1842.1253 s, estimated_remaining_time = 1860.5466 s
+t = 5.0, S_EE = 1.2451, F = 0.2888, χ = 816 / 1500, step_time = 46.645 s, elapsed_time = 1930.0589 s, estimated_remaining_time = 1910.9494 s
+t = 5.05, S_EE = 1.2465, F = 0.2887, χ = 835 / 1500, step_time = 51.0483 s, elapsed_time = 2027.0655 s, estimated_remaining_time = 1967.4459 s
+t = 5.1, S_EE = 1.2478, F = 0.2887, χ = 856 / 1500, step_time = 46.6408 s, elapsed_time = 2120.8532 s, estimated_remaining_time = 2017.8992 s
+t = 5.15, S_EE = 1.2492, F = 0.2887, χ = 877 / 1500, step_time = 48.9324 s, elapsed_time = 2217.4726 s, estimated_remaining_time = 2068.2196 s
+t = 5.2, S_EE = 1.2506, F = 0.2886, χ = 899 / 1500, step_time = 50.5981 s, elapsed_time = 2318.1199 s, estimated_remaining_time = 2119.4239 s
+t = 5.25, S_EE = 1.252, F = 0.2886, χ = 921 / 1500, step_time = 52.2441 s, elapsed_time = 2423.9831 s, estimated_remaining_time = 2172.4377 s
+t = 5.3, S_EE = 1.2534, F = 0.2886, χ = 943 / 1500, step_time = 54.0215 s, elapsed_time = 2534.5013 s, estimated_remaining_time = 2226.5712 s
+t = 5.35, S_EE = 1.2548, F = 0.2886, χ = 966 / 1500, step_time = 56.2127 s, elapsed_time = 2649.6447 s, estimated_remaining_time = 2281.6385 s
+t = 5.4, S_EE = 1.2562, F = 0.2885, χ = 990 / 1500, step_time = 59.6129 s, elapsed_time = 2771.2478 s, estimated_remaining_time = 2339.0348 s
+t = 5.45, S_EE = 1.2576, F = 0.2885, χ = 1013 / 1500, step_time = 62.6129 s, elapsed_time = 2898.9567 s, estimated_remaining_time = 2398.2278 s
+t = 5.5, S_EE = 1.259, F = 0.2885, χ = 1037 / 1500, step_time = 65.5094 s, elapsed_time = 3032.6785 s, estimated_remaining_time = 2458.9285 s
+t = 5.55, S_EE = 1.2604, F = 0.2884, χ = 1061 / 1500, step_time = 75.0788 s, elapsed_time = 3181.2286 s, estimated_remaining_time = 2527.9406 s
+t = 5.6, S_EE = 1.2618, F = 0.2884, χ = 1086 / 1500, step_time = 85.9452 s, elapsed_time = 3345.291 s, estimated_remaining_time = 2605.1824 s
+t = 5.65, S_EE = 1.2631, F = 0.2884, χ = 1111 / 1500, step_time = 76.9721 s, elapsed_time = 3500.6604 s, estimated_remaining_time = 2671.5566 s
+t = 5.7, S_EE = 1.2645, F = 0.2884, χ = 1137 / 1500, step_time = 79.8613 s, elapsed_time = 3663.3778 s, estimated_remaining_time = 2739.5695 s
+t = 5.75, S_EE = 1.2659, F = 0.2884, χ = 1164 / 1500, step_time = 83.6884 s, elapsed_time = 3835.0111 s, estimated_remaining_time = 2810.1374 s
+t = 5.8, S_EE = 1.2673, F = 0.2883, χ = 1192 / 1500, step_time = 93.7921 s, elapsed_time = 4024.2498 s, estimated_remaining_time = 2889.205 s
+t = 5.85, S_EE = 1.2687, F = 0.2883, χ = 1220 / 1500, step_time = 91.1157 s, elapsed_time = 4213.9828 s, estimated_remaining_time = 2964.0726 s
+t = 5.9, S_EE = 1.2701, F = 0.2883, χ = 1249 / 1500, step_time = 95.5636 s, elapsed_time = 4412.8187 s, estimated_remaining_time = 3040.7658 s
+t = 5.95, S_EE = 1.2715, F = 0.2883, χ = 1279 / 1500, step_time = 111.1383 s, elapsed_time = 4638.0503 s, estimated_remaining_time = 3130.684 s
+t = 6.0, S_EE = 1.2729, F = 0.2883, χ = 1310 / 1500, step_time = 110.1165 s, elapsed_time = 4864.8716 s, estimated_remaining_time = 3216.444 s
+t = 6.05, S_EE = 1.2743, F = 0.2883, χ = 1341 / 1500, step_time = 111.5779 s, elapsed_time = 5101.2686 s, estimated_remaining_time = 3303.2805 s
+t = 6.1, S_EE = 1.2757, F = 0.2883, χ = 1372 / 1500, step_time = 116.4781 s, elapsed_time = 5349.0909 s, estimated_remaining_time = 3392.1064 s
+t = 6.15, S_EE = 1.2771, F = 0.2883, χ = 1404 / 1500, step_time = 122.7991 s, elapsed_time = 5605.2489 s, estimated_remaining_time = 3480.6788 s
+t = 6.2, S_EE = 1.2786, F = 0.2882, χ = 1436 / 1500, step_time = 131.1185 s, elapsed_time = 5880.2988 s, estimated_remaining_time = 3575.2217 s
+t = 6.25, S_EE = 1.28, F = 0.2882, χ = 1469 / 1500, step_time = 139.431 s, elapsed_time = 6170.2509 s, estimated_remaining_time = 3672.7684 s
+t = 6.3, S_EE = 1.2814, F = 0.2882, χ = 1500 / 1500, step_time = 145.7939 s, elapsed_time = 6478.6195 s, estimated_remaining_time = 3774.9436 s
+Warning: Maximum bond dimension reached at t = 6.3. Consider increasing bond_dim.
+t = 6.35, S_EE = 1.2828, F = 0.2882, χ = 1500 / 1500, step_time = 148.6139 s, elapsed_time = 6794.4739 s, estimated_remaining_time = 3874.9734 s
+Warning: Maximum bond dimension reached at t = 6.35. Consider increasing bond_dim.
+t = 6.4, S_EE = 1.2842, F = 0.2882, χ = 1500 / 1500, step_time = 153.6464 s, elapsed_time = 7122.2625 s, estimated_remaining_time = 3975.2163 s
+Warning: Maximum bond dimension reached at t = 6.4. Consider increasing bond_dim.
+t = 6.45, S_EE = 1.2856, F = 0.2882, χ = 1500 / 1500, step_time = 159.4042 s, elapsed_time = 7461.4553 s, estimated_remaining_time = 4075.1025 s
+Warning: Maximum bond dimension reached at t = 6.45. Consider increasing bond_dim.
+t = 6.5, S_EE = 1.287, F = 0.2882, χ = 1500 / 1500, step_time = 169.0029 s, elapsed_time = 7814.3817 s, estimated_remaining_time = 4175.6238 s
+Warning: Maximum bond dimension reached at t = 6.5. Consider increasing bond_dim.
+t = 6.55, S_EE = 1.2884, F = 0.2881, χ = 1500 / 1500, step_time = 188.4712 s, elapsed_time = 8197.3044 s, estimated_remaining_time = 4284.9546 s
+Warning: Maximum bond dimension reached at t = 6.55. Consider increasing bond_dim.
+t = 6.6, S_EE = 1.2898, F = 0.2881, χ = 1500 / 1500, step_time = 193.2076 s, elapsed_time = 8595.2145 s, estimated_remaining_time = 4394.5458 s
+Warning: Maximum bond dimension reached at t = 6.6. Consider increasing bond_dim.
+t = 6.65, S_EE = 1.2912, F = 0.2881, χ = 1500 / 1500, step_time = 189.0228 s, elapsed_time = 8991.2223 s, estimated_remaining_time = 4495.6112 s
+Warning: Maximum bond dimension reached at t = 6.65. Consider increasing bond_dim.
+t = 6.7, S_EE = 1.2926, F = 0.2881, χ = 1500 / 1500, step_time = 201.0736 s, elapsed_time = 9399.48 s, estimated_remaining_time = 4595.3013 s
+Warning: Maximum bond dimension reached at t = 6.7. Consider increasing bond_dim.
+t = 6.75, S_EE = 1.2941, F = 0.2881, χ = 1500 / 1500, step_time = 200.7234 s, elapsed_time = 9808.1763 s, estimated_remaining_time = 4687.7313 s
+Warning: Maximum bond dimension reached at t = 6.75. Consider increasing bond_dim.
+t = 6.8, S_EE = 1.2955, F = 0.2881, χ = 1500 / 1500, step_time = 203.3203 s, elapsed_time = 10216.7708 s, estimated_remaining_time = 4772.798 s
+Warning: Maximum bond dimension reached at t = 6.8. Consider increasing bond_dim.
+t = 6.85, S_EE = 1.2969, F = 0.2881, χ = 1500 / 1500, step_time = 196.2871 s, elapsed_time = 10621.329 s, estimated_remaining_time = 4848.8676 s
+Warning: Maximum bond dimension reached at t = 6.85. Consider increasing bond_dim.
+t = 6.9, S_EE = 1.2983, F = 0.288, χ = 1500 / 1500, step_time = 206.9166 s, elapsed_time = 11033.0419 s, estimated_remaining_time = 4921.2129 s
+Warning: Maximum bond dimension reached at t = 6.9. Consider increasing bond_dim.
+t = 6.95, S_EE = 1.2997, F = 0.288, χ = 1500 / 1500, step_time = 207.562 s, elapsed_time = 11454.6496 s, estimated_remaining_time = 4990.9545 s
+Warning: Maximum bond dimension reached at t = 6.95. Consider increasing bond_dim.
+t = 7.0, S_EE = 1.3011, F = 0.288, χ = 1500 / 1500, step_time = 207.8285 s, elapsed_time = 11874.1006 s, estimated_remaining_time = 5052.8088 s
+Warning: Maximum bond dimension reached at t = 7.0. Consider increasing bond_dim.
+t = 7.05, S_EE = 1.3025, F = 0.288, χ = 1500 / 1500, step_time = 208.0918 s, elapsed_time = 12293.9364 s, estimated_remaining_time = 5108.044 s
+Warning: Maximum bond dimension reached at t = 7.05. Consider increasing bond_dim.
+t = 7.1, S_EE = 1.3039, F = 0.288, χ = 1500 / 1500, step_time = 263.822 s, elapsed_time = 12768.9996 s, estimated_remaining_time = 5179.0348 s
+Warning: Maximum bond dimension reached at t = 7.1. Consider increasing bond_dim.
+t = 7.15, S_EE = 1.3054, F = 0.288, χ = 1500 / 1500, step_time = 288.9672 s, elapsed_time = 13387.6198 s, estimated_remaining_time = 5299.2662 s
+Warning: Maximum bond dimension reached at t = 7.15. Consider increasing bond_dim.
+t = 7.2, S_EE = 1.3068, F = 0.288, χ = 1500 / 1500, step_time = 279.0983 s, elapsed_time = 13936.4504 s, estimated_remaining_time = 5382.3533 s
+Warning: Maximum bond dimension reached at t = 7.2. Consider increasing bond_dim.
+t = 7.25, S_EE = 1.3082, F = 0.288, χ = 1500 / 1500, step_time = 290.02 s, elapsed_time = 14499.7161 s, estimated_remaining_time = 5462.2218 s
+Warning: Maximum bond dimension reached at t = 7.25. Consider increasing bond_dim.
+t = 7.3, S_EE = 1.3096, F = 0.288, χ = 1500 / 1500, step_time = 281.1021 s, elapsed_time = 15061.1497 s, estimated_remaining_time = 5532.6672 s
+Warning: Maximum bond dimension reached at t = 7.3. Consider increasing bond_dim.
+t = 7.35, S_EE = 1.311, F = 0.288, χ = 1500 / 1500, step_time = 289.6127 s, elapsed_time = 15621.3214 s, estimated_remaining_time = 5594.1219 s
+Warning: Maximum bond dimension reached at t = 7.35. Consider increasing bond_dim.
+t = 7.4, S_EE = 1.3124, F = 0.288, χ = 1500 / 1500, step_time = 301.3413 s, elapsed_time = 16209.1099 s, estimated_remaining_time = 5656.8706 s
+Warning: Maximum bond dimension reached at t = 7.4. Consider increasing bond_dim.
+t = 7.45, S_EE = 1.3139, F = 0.288, χ = 1500 / 1500, step_time = 294.673 s, elapsed_time = 16792.7823 s, estimated_remaining_time = 5709.546 s
+Warning: Maximum bond dimension reached at t = 7.45. Consider increasing bond_dim.
+t = 7.5, S_EE = 1.3153, F = 0.288, χ = 1500 / 1500, step_time = 290.4144 s, elapsed_time = 17356.8931 s, estimated_remaining_time = 5747.3156 s
+Warning: Maximum bond dimension reached at t = 7.5. Consider increasing bond_dim.
+t = 7.55, S_EE = 1.3167, F = 0.288, χ = 1500 / 1500, step_time = 306.798 s, elapsed_time = 17949.2578 s, estimated_remaining_time = 5786.2739 s
+Warning: Maximum bond dimension reached at t = 7.55. Consider increasing bond_dim.
+t = 7.6, S_EE = 1.3181, F = 0.288, χ = 1500 / 1500, step_time = 313.6447 s, elapsed_time = 18548.1704 s, estimated_remaining_time = 5819.0339 s
+Warning: Maximum bond dimension reached at t = 7.6. Consider increasing bond_dim.
+t = 7.65, S_EE = 1.3195, F = 0.288, χ = 1500 / 1500, step_time = 301.9034 s, elapsed_time = 19132.6041 s, estimated_remaining_time = 5839.1714 s
+Warning: Maximum bond dimension reached at t = 7.65. Consider increasing bond_dim.
+t = 7.7, S_EE = 1.321, F = 0.288, χ = 1500 / 1500, step_time = 299.7629 s, elapsed_time = 19709.2701 s, estimated_remaining_time = 5849.2027 s
+Warning: Maximum bond dimension reached at t = 7.7. Consider increasing bond_dim.
+t = 7.75, S_EE = 1.3224, F = 0.288, χ = 1500 / 1500, step_time = 303.1192 s, elapsed_time = 20294.9791 s, estimated_remaining_time = 5854.3209 s
+Warning: Maximum bond dimension reached at t = 7.75. Consider increasing bond_dim.
+t = 7.8, S_EE = 1.3238, F = 0.2879, χ = 1500 / 1500, step_time = 340.6227 s, elapsed_time = 20941.7605 s, estimated_remaining_time = 5869.0284 s
+Warning: Maximum bond dimension reached at t = 7.8. Consider increasing bond_dim.
+t = 7.85, S_EE = 1.3252, F = 0.2879, χ = 1500 / 1500, step_time = 320.0751 s, elapsed_time = 21548.7886 s, estimated_remaining_time = 5864.5437 s
+Warning: Maximum bond dimension reached at t = 7.85. Consider increasing bond_dim.
+t = 7.9, S_EE = 1.3266, F = 0.2879, χ = 1500 / 1500, step_time = 306.2592 s, elapsed_time = 22140.8126 s, estimated_remaining_time = 5848.5165 s
+Warning: Maximum bond dimension reached at t = 7.9. Consider increasing bond_dim.
+t = 7.95, S_EE = 1.3281, F = 0.2879, χ = 1500 / 1500, step_time = 313.8387 s, elapsed_time = 22740.2308 s, estimated_remaining_time = 5827.1841 s
+Warning: Maximum bond dimension reached at t = 7.95. Consider increasing bond_dim.
+t = 8.0, S_EE = 1.3295, F = 0.2879, χ = 1500 / 1500, step_time = 337.6969 s, elapsed_time = 23365.7374 s, estimated_remaining_time = 5805.1521 s
+Warning: Maximum bond dimension reached at t = 8.0. Consider increasing bond_dim.
+t = 8.05, S_EE = 1.3309, F = 0.2879, χ = 1500 / 1500, step_time = 313.5824 s, elapsed_time = 23960.7169 s, estimated_remaining_time = 5768.3207 s
+Warning: Maximum bond dimension reached at t = 8.05. Consider increasing bond_dim.
+t = 8.1, S_EE = 1.3323, F = 0.2879, χ = 1500 / 1500, step_time = 363.2155 s, elapsed_time = 24651.9271 s, estimated_remaining_time = 5747.075 s
+Warning: Maximum bond dimension reached at t = 8.1. Consider increasing bond_dim.
+t = 8.15, S_EE = 1.3337, F = 0.2879, χ = 1500 / 1500, step_time = 292.1554 s, elapsed_time = 25221.6297 s, estimated_remaining_time = 5690.2457 s
+Warning: Maximum bond dimension reached at t = 8.15. Consider increasing bond_dim.
+t = 8.2, S_EE = 1.3352, F = 0.2879, χ = 1500 / 1500, step_time = 288.5742 s, elapsed_time = 25785.1189 s, estimated_remaining_time = 5625.8441 s
+Warning: Maximum bond dimension reached at t = 8.2. Consider increasing bond_dim.
+t = 8.25, S_EE = 1.3366, F = 0.2879, χ = 1500 / 1500, step_time = 287.1675 s, elapsed_time = 26350.7604 s, estimated_remaining_time = 5555.8832 s
+Warning: Maximum bond dimension reached at t = 8.25. Consider increasing bond_dim.
+t = 8.3, S_EE = 1.338, F = 0.2879, χ = 1500 / 1500, step_time = 296.6838 s, elapsed_time = 26924.9255 s, estimated_remaining_time = 5481.7214 s
+Warning: Maximum bond dimension reached at t = 8.3. Consider increasing bond_dim.
+t = 8.35, S_EE = 1.3394, F = 0.2879, χ = 1500 / 1500, step_time = 300.2137 s, elapsed_time = 27498.1301 s, estimated_remaining_time = 5401.4184 s
+Warning: Maximum bond dimension reached at t = 8.35. Consider increasing bond_dim.
+t = 8.4, S_EE = 1.3408, F = 0.2879, χ = 1500 / 1500, step_time = 304.1233 s, elapsed_time = 28072.3494 s, estimated_remaining_time = 5315.4744 s
+Warning: Maximum bond dimension reached at t = 8.4. Consider increasing bond_dim.
+t = 8.45, S_EE = 1.3423, F = 0.2879, χ = 1500 / 1500, step_time = 299.9023 s, elapsed_time = 28644.0589 s, estimated_remaining_time = 5223.3284 s
+Warning: Maximum bond dimension reached at t = 8.45. Consider increasing bond_dim.
+t = 8.5, S_EE = 1.3437, F = 0.2879, χ = 1500 / 1500, step_time = 289.7457 s, elapsed_time = 29208.027 s, estimated_remaining_time = 5124.2153 s
+Warning: Maximum bond dimension reached at t = 8.5. Consider increasing bond_dim.
+t = 8.55, S_EE = 1.3451, F = 0.2879, χ = 1500 / 1500, step_time = 293.3964 s, elapsed_time = 29779.7414 s, estimated_remaining_time = 5021.0029 s
+Warning: Maximum bond dimension reached at t = 8.55. Consider increasing bond_dim.
+t = 8.6, S_EE = 1.3465, F = 0.2879, χ = 1500 / 1500, step_time = 299.8092 s, elapsed_time = 30356.1594 s, estimated_remaining_time = 4913.1356 s
+Warning: Maximum bond dimension reached at t = 8.6. Consider increasing bond_dim.
+t = 8.65, S_EE = 1.348, F = 0.2879, χ = 1500 / 1500, step_time = 298.4038 s, elapsed_time = 30923.7579 s, estimated_remaining_time = 4798.5142 s
+Warning: Maximum bond dimension reached at t = 8.65. Consider increasing bond_dim.
+t = 8.7, S_EE = 1.3494, F = 0.2879, χ = 1500 / 1500, step_time = 293.4158 s, elapsed_time = 31495.2938 s, estimated_remaining_time = 4679.3008 s
+Warning: Maximum bond dimension reached at t = 8.7. Consider increasing bond_dim.
+t = 8.75, S_EE = 1.3508, F = 0.2879, χ = 1500 / 1500, step_time = 301.4003 s, elapsed_time = 32070.0869 s, estimated_remaining_time = 4555.4101 s
+Warning: Maximum bond dimension reached at t = 8.75. Consider increasing bond_dim.
+t = 8.8, S_EE = 1.3523, F = 0.2879, χ = 1500 / 1500, step_time = 300.7995 s, elapsed_time = 32643.8205 s, estimated_remaining_time = 4426.2807 s
+Warning: Maximum bond dimension reached at t = 8.8. Consider increasing bond_dim.
+t = 8.85, S_EE = 1.3537, F = 0.2879, χ = 1500 / 1500, step_time = 290.6674 s, elapsed_time = 33212.7454 s, estimated_remaining_time = 4291.5345 s
+Warning: Maximum bond dimension reached at t = 8.85. Consider increasing bond_dim.
+t = 8.9, S_EE = 1.3551, F = 0.2879, χ = 1500 / 1500, step_time = 303.1139 s, elapsed_time = 33795.5377 s, estimated_remaining_time = 4153.6415 s
+Warning: Maximum bond dimension reached at t = 8.9. Consider increasing bond_dim.
+t = 8.95, S_EE = 1.3565, F = 0.2879, χ = 1500 / 1500, step_time = 294.2246 s, elapsed_time = 34366.4695 s, estimated_remaining_time = 4009.4214 s
+Warning: Maximum bond dimension reached at t = 8.95. Consider increasing bond_dim.
+t = 9.0, S_EE = 1.358, F = 0.2879, χ = 1500 / 1500, step_time = 302.6352 s, elapsed_time = 34941.2562 s, estimated_remaining_time = 3860.9123 s
+Warning: Maximum bond dimension reached at t = 9.0. Consider increasing bond_dim.
+t = 9.05, S_EE = 1.3594, F = 0.2879, χ = 1500 / 1500, step_time = 298.8291 s, elapsed_time = 35513.2289 s, estimated_remaining_time = 3707.425 s
+Warning: Maximum bond dimension reached at t = 9.05. Consider increasing bond_dim.
+t = 9.1, S_EE = 1.3608, F = 0.2879, χ = 1500 / 1500, step_time = 299.4945 s, elapsed_time = 36092.2548 s, estimated_remaining_time = 3550.0578 s
+Warning: Maximum bond dimension reached at t = 9.1. Consider increasing bond_dim.
+t = 9.15, S_EE = 1.3622, F = 0.2879, χ = 1500 / 1500, step_time = 297.5516 s, elapsed_time = 36659.366 s, estimated_remaining_time = 3387.0066 s
+Warning: Maximum bond dimension reached at t = 9.15. Consider increasing bond_dim.
+t = 9.2, S_EE = 1.3637, F = 0.2879, χ = 1500 / 1500, step_time = 299.8089 s, elapsed_time = 37240.0764 s, estimated_remaining_time = 3220.7634 s
+Warning: Maximum bond dimension reached at t = 9.2. Consider increasing bond_dim.
+t = 9.25, S_EE = 1.3651, F = 0.2879, χ = 1500 / 1500, step_time = 301.4602 s, elapsed_time = 37811.8507 s, estimated_remaining_time = 3049.3428 s
+Warning: Maximum bond dimension reached at t = 9.25. Consider increasing bond_dim.
+t = 9.3, S_EE = 1.3665, F = 0.2879, χ = 1500 / 1500, step_time = 296.8255 s, elapsed_time = 38392.429 s, estimated_remaining_time = 2874.2995 s
+Warning: Maximum bond dimension reached at t = 9.3. Consider increasing bond_dim.
+t = 9.35, S_EE = 1.3679, F = 0.2879, χ = 1500 / 1500, step_time = 301.2733 s, elapsed_time = 38969.4912 s, estimated_remaining_time = 2694.6989 s
+Warning: Maximum bond dimension reached at t = 9.35. Consider increasing bond_dim.
+t = 9.4, S_EE = 1.3693, F = 0.2879, χ = 1500 / 1500, step_time = 303.8323 s, elapsed_time = 39557.4097 s, estimated_remaining_time = 2511.5816 s
+Warning: Maximum bond dimension reached at t = 9.4. Consider increasing bond_dim.
+t = 9.45, S_EE = 1.3708, F = 0.2879, χ = 1500 / 1500, step_time = 301.4008 s, elapsed_time = 40132.2798 s, estimated_remaining_time = 2323.4478 s
+Warning: Maximum bond dimension reached at t = 9.45. Consider increasing bond_dim.
+t = 9.5, S_EE = 1.3722, F = 0.2879, χ = 1500 / 1500, step_time = 303.1493 s, elapsed_time = 40719.3462 s, estimated_remaining_time = 2131.9029 s
+Warning: Maximum bond dimension reached at t = 9.5. Consider increasing bond_dim.
+t = 9.55, S_EE = 1.3736, F = 0.2879, χ = 1500 / 1500, step_time = 305.7302 s, elapsed_time = 41299.6535 s, estimated_remaining_time = 1935.9213 s
+Warning: Maximum bond dimension reached at t = 9.55. Consider increasing bond_dim.
+t = 9.6, S_EE = 1.375, F = 0.2879, χ = 1500 / 1500, step_time = 303.8154 s, elapsed_time = 41885.2383 s, estimated_remaining_time = 1736.1757 s
+Warning: Maximum bond dimension reached at t = 9.6. Consider increasing bond_dim.
+t = 9.65, S_EE = 1.3765, F = 0.2879, χ = 1500 / 1500, step_time = 300.2195 s, elapsed_time = 42463.0716 s, estimated_remaining_time = 1532.1727 s
+Warning: Maximum bond dimension reached at t = 9.65. Consider increasing bond_dim.
+t = 9.7, S_EE = 1.3779, F = 0.2879, χ = 1500 / 1500, step_time = 298.696 s, elapsed_time = 43044.9403 s, estimated_remaining_time = 1324.4597 s
+Warning: Maximum bond dimension reached at t = 9.7. Consider increasing bond_dim.
+t = 9.75, S_EE = 1.3793, F = 0.288, χ = 1500 / 1500, step_time = 298.4932 s, elapsed_time = 43615.0861 s, estimated_remaining_time = 1112.6297 s
+Warning: Maximum bond dimension reached at t = 9.75. Consider increasing bond_dim.
+t = 9.8, S_EE = 1.3807, F = 0.288, χ = 1500 / 1500, step_time = 300.3214 s, elapsed_time = 44202.5126 s, estimated_remaining_time = 897.5129 s
+Warning: Maximum bond dimension reached at t = 9.8. Consider increasing bond_dim.
+t = 9.85, S_EE = 1.3822, F = 0.288, χ = 1500 / 1500, step_time = 308.6856 s, elapsed_time = 44781.1488 s, estimated_remaining_time = 678.5023 s
+Warning: Maximum bond dimension reached at t = 9.85. Consider increasing bond_dim.
+t = 9.9, S_EE = 1.3836, F = 0.288, χ = 1500 / 1500, step_time = 290.3055 s, elapsed_time = 45348.1363 s, estimated_remaining_time = 455.7602 s
+Warning: Maximum bond dimension reached at t = 9.9. Consider increasing bond_dim.
+t = 9.95, S_EE = 1.385, F = 0.288, χ = 1500 / 1500, step_time = 303.7673 s, elapsed_time = 45929.2078 s, estimated_remaining_time = 229.646 s
+Warning: Maximum bond dimension reached at t = 9.95. Consider increasing bond_dim.
+t = 10.0, S_EE = 1.3864, F = 0.288, χ = 1500 / 1500, step_time = 297.0324 s, elapsed_time = 46506.3327 s, estimated_remaining_time = 0.0 s
+Warning: Maximum bond dimension reached at t = 10.0. Consider increasing bond_dim.
+============================================================
+Quench simulation completed: 2026-07-04T00:22:19.927
+Total time evolution duration: 775.11 min
+============================================================

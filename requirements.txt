@@ -17,6 +17,7 @@ exceptiongroup==1.3.0
 executing==2.2.0
 fastjsonschema==2.21.1
 fonttools==4.59.0
+h5py==3.16.0
 idna==3.10
 importlib_metadata==8.7.0
 importlib_resources==6.5.2
