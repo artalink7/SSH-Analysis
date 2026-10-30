@@ -30,7 +30,8 @@ export GenerateDataEntropy, GenerateDataEntropyEquilibrium,
        simulate_quench_only_fluctuations_extended_tebd, extract_bipartite_fluctuations_centered,
        extract_bipartite_fluctuations_edge, extract_bipartite_fluctuations_edge_new,
        simulate_quench_only_fluctuations_extended_tebd_new, extract_bipartite_fluctuations_centered_new,
-       simulate_quench_only_fluctuations_new, compute_and_save_ground_state, evolve_from_ground_state
+       simulate_quench_only_fluctuations_new, compute_and_save_ground_state, evolve_from_ground_state_fluctuations, 
+       compute_and_save_ground_state_ssh, evolve_from_ground_state_ssh, evolve_from_ground_state_entropy
 
 include("BlochVectors.jl")
 include("DensityMatrix.jl")

@@ -1,7 +1,8 @@
-push!(LOAD_PATH, joinpath(@__DIR__, "..","..","..","..", "src"))
+push!(LOAD_PATH, joinpath(@__DIR__, "..","..","..","..","..", "src"))
 using SSHAnalysis
 using ITensors
 using LinearAlgebra
+using Dates
 
 # ---------------------------------------------------------------------
 # Threading setup — do this BEFORE building any sites/tensors.
@@ -51,17 +52,11 @@ println("Julia threads: $n_cores, BLAS threads: $(BLAS.get_num_threads()), " *
 
 # Parameters
 N_sites = 1200
-T_max = 7.0
+N_particles = 300
+T_max = 5.0
 dt = 0.05
-
-# Paths
-data_dir = joinpath(ProjectRoot(), "data", "quench", "quench_paper")
-log_dir = joinpath(ProjectRoot(), "logs", "quench", "quench_paper")
-ckpt_dir = joinpath(ProjectRoot(), "checkpoints", "quench", "quench_paper")
-mkpath(log_dir)
-mkpath(ckpt_dir)
-log_file = joinpath(log_dir, "quench_from_LL_to_LL_NNN_coupling_bd1600_$(N_sites)_decrease_V_DV02_$(T_max)_edge_subsystem_l80.log")
-checkpoint_file = joinpath(ckpt_dir, "quench_from_LL_to_LL_NNN_coupling_bd1600_$(N_sites)_decrease_V_DV02_$(T_max)_edge_subsystem_l80.h5")
+pre_quench =  ExtendedTBParams(t0=1.0, t2=0.0, V=0.5)
+post_quench = ExtendedTBParams(t0=1.0, t2=0.2, V=0.5)
 
 # Bond dim: bumped up from 1700. Ramp this rather than jumping straight to
 # something huge — go up, watch memory in htop/free, confirm it's stable,
@@ -70,35 +65,41 @@ checkpoint_file = joinpath(ckpt_dir, "quench_from_LL_to_LL_NNN_coupling_bd1600_$
 # estimate (N * chi^2 * d), since only the physically populated QN blocks
 # are stored — so don't be scared off by a large dense estimate alone,
 # just verify empirically at your actual filling/parameters.
-bond_dimension = 1600
+bond_dimension = 1800
 cutoff = 1e-10
 
-pre_quench =  ExtendedTBParams(t0=1.0, t2=0.3, V=0.7)
-post_quench = ExtendedTBParams(t0=1.0, t2=0.3, V=0.5)
+# Paths
+data_dir = joinpath(ProjectRoot(), "data", "quench", "quench_paper","NNN")
+log_dir = joinpath(ProjectRoot(), "logs", "quench", "quench_paper","NNN")
+ground_state_dir = joinpath(ProjectRoot(), "ground_state", "NNN")
+ground_state_log_dir = joinpath(ProjectRoot(), "ground_state", "logs")
+ckpt_dir = joinpath(ProjectRoot(), "checkpoints", "quench", "quench_paper","NNN")
+mkpath(log_dir)
+mkpath(ckpt_dir)
+mkpath(ground_state_dir)
+
+log_file = joinpath(log_dir, "NNN_coupling_bd$(bond_dimension)_$(N_sites)_decrease_V_DV02_$(T_max)_centered_subsystem_l80_after_checkpoint.log")
+checkpoint_file = joinpath(ckpt_dir, "NNN_coupling_bd$(bond_dimension)_$(N_sites)_decrease_V_DV02_$(T_max)_centered_subsystem_l80.h5")
+gs_tag = "ctr-N$(N_sites)_FillingFraction$(N_particles/N_sites)_t2i$(pre_quench.t2)_t2f$(post_quench.t2)"
+ground_state_file = joinpath(ground_state_dir, "$(gs_tag)_$(Dates.format(now(), "yyyymmdd_HHMMSS")).h5")
+ground_state_log_file = joinpath(ground_state_log_dir, "NNN_coupling_$(gs_tag).log")
 
 # --- Fresh run with checkpointing enabled ---
 # checkpoint_every=20 steps * dt=0.05 => a checkpoint roughly every 1.0
 # time unit. Adjust to trade "protection against losing progress" against
 # checkpoint I/O overhead (writing chi~2000+ MPS tensors isn't free).
-times, variances = simulate_quench_only_fluctuations_extended_tebd_new(
-    N_sites, T_max, dt, pre_quench, post_quench;
-    bond_dim=bond_dimension, cutoff=cutoff, logfile=log_file,
-    checkpoint_file=checkpoint_file, checkpoint_every=20, subsystem_a = 561, subsystem_b = 640, 
-    resume_from=checkpoint_file
-)
 
-# --- Example: resuming a run that stopped or that you want to extend at
-#     higher bond_dim, instead of the call above ---
-#
-# times, entropies, variances = simulate_quench(
-#     N_sites, T_max, dt, pre_quench, post_quench;
-#     bond_dim=3000, cutoff=cutoff, logfile=log_file,
-#     checkpoint_file=checkpoint_file, checkpoint_every=20,
-#     resume_from=checkpoint_file,
-# )
+E0, psi, quality = compute_and_save_ground_state(N_sites, pre_quench, ground_state_file,
+    Nf = N_particles,
+    logfile = ground_state_log_file)
+
+times, variances = evolve_from_ground_state_fluctuations(ground_state_file, T_max, dt, post_quench,
+    bond_dim=bond_dimension, cutoff = cutoff, logfile = log_file, checkpoint_file=checkpoint_file,
+    subsystem_a = 501, subsystem_b = 700, fluctuations_every = 5)
+
 
 df = DataFrame(Time=times, Variance=variances)
-filename = "quench_from_LL_to_LL_NNN_coupling_decrease_V_DV02_sites$(N_sites)_time$(T_max)_bonddim$(bond_dimension)_cutoff$(cutoff)_central_subsystem_l80.csv"
+filename = "quench_NN_to_NNN_$(gs_tag).csv"
 full_save_path = joinpath(data_dir, filename)
 CSV.write(full_save_path, df)
 println("Quench simulation completed and data saved to $full_save_path")

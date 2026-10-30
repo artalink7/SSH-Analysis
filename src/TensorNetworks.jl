@@ -185,17 +185,31 @@ function measure_S_EE(psi::MPS, N::Int; a::Int, b::Int)
 end
 
 function product_state_Nf(N::Int, Nf::Int; pattern::Symbol=:alternating)
-    @assert 0<= Nf <= N
+    @assert 0 <= Nf <= N
     st = fill("0", N)
+    Nf == 0 && return st
 
-    if pattern == :alternating 
-        order = vcat(collect(1:2:N), collect(2:2:N))
+    if pattern == :alternating
+        # Evenly space Nf particles across all N sites via a Bresenham-style
+        # rounding rule: position k -> round((k - 0.5) * N/Nf). At Nf = N/2
+        # this reduces exactly to the original odd-site pattern (verified:
+        # (k-0.5)*2 = 2k-1, the k-th odd integer); away from half filling it
+        # still spreads particles across the whole chain instead of packing
+        # them into a contiguous run at one end.
+        step = N / Nf
+        occupied = falses(N)
+        for k in 1:Nf
+            pos = clamp(round(Int, (k - 0.5) * step), 1, N)
+            while occupied[pos]              # rounding collision guard
+                pos = pos < N ? pos + 1 : pos - 1
+            end
+            occupied[pos] = true
+        end
+        for i in 1:N
+            occupied[i] && (st[i] = "1")
+        end
     else
         error("Unknown pattern = $pattern")
-    end
-
-    for k in 1:Nf
-        st[order[k]] = "1"
     end
 
     return st
@@ -230,53 +244,6 @@ function ground_energy(H::MPO, sites; init_state, nsweeps=12,
 
     energy, psi = dmrg(H, psi0, sweeps; outputlevel=outputlevel)
     return energy, psi
-end
-
-function build_tebd_gates(sites, p::SSHParams; dt=0.05)
-    N = length(sites)
-    gates = ITensor[]
-
-    # Forward sweep: dt/2
-    for j in 1:(N - 1)
-        s1 = sites[j]
-        s2 = sites[j + 1]
-
-        # Alternating hopping parameters for SSH
-        hop = (j % 2 != 0) ? p.v : p.w
-
-        # Non-interacting bond Hamiltonian
-        hj = -hop * op("Cdag", s1) * op("C", s2) - hop * op("Cdag", s2) * op("C", s1)
-
-        # Nearest-neighbor interaction
-        if p.V != 0.0
-            Id1 = op("Id", s1)
-            Id2 = op("Id", s2)
-            hj += p.V * op("N", s1) * op("N", s2)
-            hj += -(p.V/2) * op("N", s1) * Id2
-            hj += -(p.V/2) * Id1 * op("N", s2)
-        end
-
-        # Optional staggered potential 
-        if p.Δ != 0.0
-            Id1 = op("Id", s1)
-            Id2 = op("Id", s2)
-            hj += p.Δ * (-1)^j * op("N", s1) * Id2
-            if j == N - 1
-                # pick up the last site's on-site term on the final bond
-                hj += p.Δ * (-1)^(j+1) * Id1 * op("N", s2)
-            end
-        end
-
-        Gj = exp(-im * dt / 2 * hj)
-        push!(gates, Gj)
-    end
-
-    # Reverse sweep: dt/2 to complete the 2nd order Trotter step
-    append!(gates, reverse(gates))
-
-    println("Constructed ", length(gates), " TEBD gates for quench evolution.")
-
-    return gates
 end
 
 function build_extended_tb_tebd_gates(sites, p::ExtendedTBParams; dt=0.05)
@@ -326,47 +293,92 @@ function build_extended_tb_tebd_gates(sites, p::ExtendedTBParams; dt=0.05)
     return gates
 end
 
-#
-# PATCHED VERSION of the quench-related functions from your SSHAnalysis module.
-#
-# What changed vs. your original, and why:
-#
-#   1. simulate_quench() now logs `norm_before` (the norm of psi right after
-#      `apply(...)` but before `normalize!`). You were already computing this
-#      and discarding it — it's actually your truncation-error diagnostic.
-#      Since the TEBD gates are unitary, exact evolution preserves the norm;
-#      any drop below 1 comes purely from SVD truncation at maxdim/cutoff.
-#      We turn it into a running "cumulative fidelity" estimate:
-#           total_fidelity *= norm_before^2
-#      so you get a concrete, per-step and cumulative number for how much
-#      the χ=1700 cap is actually costing you past t≈3.7, instead of just
-#      knowing "χ hit the ceiling".
-#
-#   2. Checkpointing: psi + accumulated observables are written to an HDF5
-#      file every `checkpoint_every` steps. This means (a) a crash doesn't
-#      cost you the full run, and (b) you can extend/rerun the *tail* of a
-#      quench at a larger bond_dim without redoing DMRG + the cheap early
-#      dynamics.
-#
-#   3. Resume support: pass `resume_from=<checkpoint path>` to continue an
-#      evolution from a saved state, optionally with a different bond_dim
-#      or cutoff than the original run used.
-#
-#   4. Threading hooks: see quench_run_script_patched.jl — the physics code
-#      here is unchanged except for the two additions above, since threading
-#      is a global/process-level setting, not something that belongs inside
-#      this function.
-#
-# Everything else (build_SSH_MPO_OBC, build_tebd_gates, measure_observables,
-# product_state_Nf, ground_energy, create_CDW_states) is untouched — paste
-# this in place of your existing simulate_quench, and add the two small
-# helper functions (save_checkpoint / load_checkpoint) alongside it.
+# ---------------------------------------------------------------------------
+# SSH chain: 2nd-order Trotter gates (same Hamiltonian as build_SSH_MPO_OBC)
+#   H = -Σ_i t_i (c†_i c_{i+1} + h.c.)  [t_i = v on odd bonds, w on even bonds]
+#       + Δ Σ_i (-1)^i n_i
+#       + V Σ_i [ n_i n_{i+1} - n_i/2 - n_{i+1}/2 ]
+# Only nearest-neighbour terms, so every gate is a plain two-site gate.
+# ---------------------------------------------------------------------------
+function build_ssh_tebd_gates(sites, p::SSHParams; dt=0.05)
+    N = length(sites)
+    @assert N >= 2 "SSH TEBD gates need at least 2 sites"
 
-# ---------------------------------------------------------------------
-# Checkpoint helpers
-# ---------------------------------------------------------------------
+    # Local Hamiltonian on bond (i, i+1)
+    function bond_hamiltonian(i)
+        s1, s2 = sites[i], sites[i+1]
+        t = isodd(i) ? p.v : p.w          # same bond convention as build_SSH_MPO_OBC
 
-function save_checkpoint(path, psi, step, t, S_EE_vals, F_vals, total_fidelity)
+        h  = -t * op("Cdag", s1) * op("C", s2)
+        h += -t * op("Cdag", s2) * op("C", s1)
+
+        if p.V != 0.0
+            h += p.V * op("N", s1) * op("N", s2)
+            h += -(p.V/2) * op("N", s1) * op("Id", s2)
+            h += -(p.V/2) * op("Id", s1) * op("N", s2)
+        end
+
+        # Staggered potential: a bulk site belongs to two bonds, so each bond
+        # takes half of it; the two edge sites belong to one bond and take all.
+        if p.Δ != 0.0
+            w_left  = i == 1     ? 1.0 : 0.5
+            w_right = i + 1 == N ? 1.0 : 0.5
+            h += p.Δ * (-1)^i     * w_left  * op("N", s1) * op("Id", s2)
+            h += p.Δ * (-1)^(i+1) * w_right * op("Id", s1) * op("N", s2)
+        end
+        return h
+    end
+
+    # Strang splitting: e^{A1/2} ... e^{A_{N-2}/2} e^{A_{N-1}} e^{A_{N-2}/2} ... e^{A1/2}
+    # (the middle bond appears once with the full dt instead of twice with dt/2:
+    #  identical operator, one fewer SVD truncation per step)
+    half     = ITensor[exp(-im * dt / 2 * bond_hamiltonian(i)) for i in 1:(N - 2)]
+    gate_mid = exp(-im * dt * bond_hamiltonian(N - 1))
+
+    return vcat(half, [gate_mid], reverse(half))
+end
+
+
+# Single entry point used by the evolution routine: dispatches on the parameter type
+build_tebd_gates(sites, p::ExtendedTBParams; dt=0.05) = build_extended_tb_tebd_gates(sites, p; dt=dt)
+build_tebd_gates(sites, p::SSHParams; dt=0.05)        = build_ssh_tebd_gates(sites, p; dt=dt)
+
+# Log-friendly description of a Hamiltonian's parameters
+describe_params(p::ExtendedTBParams) = "t0=$(p.t0), t2=$(p.t2), V=$(p.V)"
+describe_params(p::SSHParams)        = "SSH v=$(p.v), w=$(p.w), Δ=$(p.Δ), V=$(p.V)"
+
+# Hamiltonian MPO for either model (used by the ground-state DMRG)
+build_hamiltonian_MPO(sites, p::ExtendedTBParams) = build_extended_tb_MPO_OBC(sites; p=p)
+build_hamiltonian_MPO(sites, p::SSHParams)        = build_SSH_MPO_OBC(sites; p=p)
+
+# Ground-state file I/O of the parameters. A "model" tag tells the loader which
+# struct to rebuild; files written before this tag existed are extended-TB files.
+function write_params(f, p::ExtendedTBParams)
+    write(f, "model", "extended_tb")
+    write(f, "t0", p.t0)
+    write(f, "t2", p.t2)
+    write(f, "V", p.V)
+end
+function write_params(f, p::SSHParams)
+    write(f, "model", "ssh")
+    write(f, "v", p.v)
+    write(f, "w", p.w)
+    write(f, "Delta", p.Δ)          # ASCII key on purpose
+    write(f, "V", p.V)
+end
+function read_params(f)
+    model = haskey(f, "model") ? read(f, "model") : "extended_tb"
+    if model == "extended_tb"
+        return ExtendedTBParams(t0=read(f, "t0"), t2=read(f, "t2"), V=read(f, "V"))
+    elseif model == "ssh"
+        return SSHParams(v=read(f, "v"), w=read(f, "w"), Δ=read(f, "Delta"), V=read(f, "V"))
+    else
+        error("Unknown model '$model' in ground-state file")
+    end
+end
+
+function save_checkpoint(path, psi, step, t, S_EE_vals, F_vals, total_fidelity;
+                            use_interacting_formula::Union{Bool, Nothing}=nothing)
     h5open(path, "w") do file
         write(file, "psi", psi)
         write(file, "step", step)
@@ -374,6 +386,9 @@ function save_checkpoint(path, psi, step, t, S_EE_vals, F_vals, total_fidelity)
         write(file, "S_EE_vals", S_EE_vals)
         write(file, "F_vals", F_vals)
         write(file, "total_fidelity", total_fidelity)
+        if use_interacting_formula !== nothing 
+            write(file, "use_interacting_formula", use_interacting_formula)
+        end
     end
 end
 
@@ -385,14 +400,14 @@ function load_checkpoint(path)
         S_EE_vals = read(file, "S_EE_vals")
         F_vals = read(file, "F_vals")
         total_fidelity = read(file, "total_fidelity")
+        use_interacting_formula = haskey(file, "use_interacting_formula") ? 
+            read(file, "use_interacting_formula") : nothing
         (psi=psi, step=step, t=t, S_EE_vals=S_EE_vals, F_vals=F_vals,
-         total_fidelity=total_fidelity)
+         total_fidelity=total_fidelity, use_interacting_formula = use_interacting_formula)
     end
 end
 
-# ---------------------------------------------------------------------
-# simulate_quench, patched
-# ---------------------------------------------------------------------
+
 
 function simulate_quench(N_sites, T_max, dt, pre::SSHParams, post::SSHParams;
                           bond_dim=1000, cutoff=1e-8, logfile=nothing,
@@ -538,231 +553,6 @@ function simulate_quench(N_sites, T_max, dt, pre::SSHParams, post::SSHParams;
     end
 
     return times, S_EE_vals, F_vals
-end
-
-function simulate_quench_only_fluctuations(N_sites, T_max, dt, pre::SSHParams, post::SSHParams;
-                          bond_dim=1000, cutoff=1e-8, logfile=nothing,
-                          checkpoint_file=nothing, checkpoint_every=20,
-                          resume_from=nothing, 
-                          subsystem_a=1, subsystem_b=N_sites ÷ 2)
-
-    log_io = logfile === nothing ? nothing : open(logfile, "w")
-    function log(msg)
-        println(msg)
-        if log_io !== nothing
-            println(log_io, msg)
-            flush(log_io)
-        end
-    end
-
-    log("="^60)
-    log("Quench simulation started: $(now())")
-    log("N_sites = $N_sites, T_max = $T_max, dt = $dt, bond_dim = $bond_dim, cutoff = $cutoff")
-    log("Pre-quench parameters: v=$(pre.v), w=$(pre.w), Δ=$(pre.Δ), V=$(pre.V)")
-    log("Post-quench parameters: v=$(post.v), w=$(post.w), Δ=$(post.Δ), V=$(post.V)")
-    log("Subsystem for F: sites $subsystem_a:$subsystem_b " *
-        "(touches left edge: $(subsystem_a==1), touches right edge: $(subsystem_b==N_sites))")
-    if resume_from !== nothing
-        log("Resuming from checkpoint: $resume_from")
-    end
-    log("="^60)
-
-    times = 0.0:dt:T_max
-    use_interacting_formula = !iszero(post.V) || !iszero(pre.V)
-
-    local sites, psi, gates
-    S_EE_vals = Float64[]
-    F_vals = Float64[]
-    start_step = 1
-    total_fidelity = 1.0
-
-    if resume_from === nothing
-        # --- Fresh start: sites, ground state, gates as before ---
-        sites = siteinds("Fermion", N_sites; conserve_qns=true)
-
-        log("Preparing interacting ground state (t < 0)...")
-        H_init = build_SSH_MPO_OBC(sites; p=pre)
-        init_state = product_state_Nf(N_sites, N_sites ÷ 2)
-        t_dmrg_start = time()
-        E0, psi = ground_energy(H_init, sites; init_state=init_state, nsweeps=12)
-        log("Initial Ground State Energy: $E0 (DMRG took $(round(time() - t_dmrg_start, digits=2)) seconds)")
-        log("Initial max bond dimension: $(maxlinkdim(psi))")
-
-        log("Constructing TEBD gates for quench...")
-        gates = build_tebd_gates(sites, post; dt=dt)
-    else
-        # --- Resume: load psi + history, rebuild gates against its sites ---
-        ckpt = load_checkpoint(resume_from)
-        psi = ckpt.psi
-        sites = siteinds(psi)
-        S_EE_vals = ckpt.S_EE_vals
-        F_vals = ckpt.F_vals
-        total_fidelity = ckpt.total_fidelity
-        start_step = ckpt.step + 1
-        log("Loaded checkpoint at step $(ckpt.step), t = $(ckpt.t), " *
-            "cumulative fidelity so far = $(round(total_fidelity, digits=6))")
-
-        log("Constructing TEBD gates for quench (post-resume bond_dim=$bond_dim, cutoff=$cutoff)...")
-        gates = build_tebd_gates(sites, post; dt=dt)
-    end
-
-    log("Starting time evolution...")
-    t_evolution_start = time()
-
-    for (step, t) in enumerate(times)
-        step < start_step && continue  # skip steps already done before the checkpoint
-
-        if step >= start_step && length(F_vals) < step
-            # only measure if we don't already have this step's values from a checkpoint
-            F = measure_F(psi, N_sites, use_interacting_formula ? 1.0 : 0.0; 
-                                            a=subsystem_a, b=subsystem_b)
-            push!(F_vals, F)
-        else
-            F = F_vals[step]
-        end
-
-        step_start = time()
-
-        psi = apply(gates, psi; cutoff=cutoff, maxdim=bond_dim)
-        norm_before = norm(psi)          # <-- truncation-error diagnostic
-        normalize!(psi)
-        step_time = round(time() - step_start, digits=4)
-
-        # Cumulative fidelity estimate: since the gates are unitary, any norm
-        # loss at this step is purely truncation. norm_before^2 approximates
-        # the fraction of weight kept at this step; multiplying across steps
-        # gives a running lower-bound-ish estimate of overlap with the exact
-        # (untruncated) state.
-        total_fidelity *= norm_before^2
-
-        chi = maxlinkdim(psi)
-        elapsed_time = round(time() - t_evolution_start, digits=4)
-        eta = (elapsed_time / (step - start_step + 1)) * (length(times) - step)
-
-        log("t = $(round(t, digits=3)), " *
-            "F = $(round(F, digits=4)), χ = $chi / $bond_dim, " *
-            "norm_before = $(round(norm_before, digits=8)), " *
-            "cum_fidelity = $(round(total_fidelity, digits=6)), " *
-            "step_time = $step_time s, elapsed_time = $elapsed_time s, " *
-            "estimated_remaining_time = $(round(eta, digits=4)) s")
-
-        if chi >= bond_dim
-            log("Warning: Maximum bond dimension reached at t = $t. Consider increasing bond_dim.")
-        end
-        if total_fidelity < 0.99
-            log("Warning: cumulative truncation error has exceeded 1% (cum_fidelity = " *
-                "$(round(total_fidelity, digits=6))) at t = $t. Dynamics beyond this point " *
-                "should be treated with caution.")
-        end
-
-        if checkpoint_file !== nothing && step % checkpoint_every == 0
-            save_checkpoint(checkpoint_file, psi, step, t, S_EE_vals, F_vals, total_fidelity)
-            log("Checkpoint saved at step $step (t = $t) -> $checkpoint_file")
-        end
-    end
-
-    if checkpoint_file !== nothing
-        save_checkpoint(checkpoint_file, psi, length(times), times[end], S_EE_vals, F_vals, total_fidelity)
-        log("Final checkpoint saved -> $checkpoint_file")
-    end
-
-    log("="^60)
-    log("Quench simulation completed: $(now())")
-    log("Total time evolution duration: $(round((time() - t_evolution_start)/60, digits=2)) min")
-    log("Final cumulative fidelity estimate: $(round(total_fidelity, digits=6))")
-    log("="^60)
-
-    if log_io !== nothing
-        close(log_io)
-    end
-
-    return times, F_vals
-end
-
-function simulate_quench_only_fluctuations_extended_tebd(N_sites, T_max, dt, pre::ExtendedTBParams, post::ExtendedTBParams;
-                          bond_dim=1000, cutoff=1e-8, logfile=nothing,
-                          checkpoint_file=nothing, checkpoint_every=20,
-                          resume_from=nothing,
-                          subsystem_a=1, subsystem_b=N_sites ÷ 2)
-
-    log_io = logfile === nothing ? nothing : open(logfile, "w")
-    function log(msg)
-        println(msg)
-        if log_io !== nothing
-            println(log_io, msg)
-            flush(log_io)
-        end
-    end
-
-    log("="^60)
-    log("Quench simulation started: $(now())")
-    log("N_sites = $N_sites, T_max = $T_max, dt = $dt, bond_dim = $bond_dim, cutoff = $cutoff")
-    log("Pre-quench parameters: t0=$(pre.t0), t2=$(pre.t2), V=$(pre.V)")
-    log("Post-quench parameters: t0=$(post.t0), w=$(post.t2), V=$(post.V)")
-    log("Subsystem for F: sites $subsystem_a:$subsystem_b " *
-        "(touches left edge: $(subsystem_a==1), touches right edge: $(subsystem_b==N_sites))")
-    if resume_from !== nothing
-        log("Resuming from checkpoint: $resume_from")
-    end
-    log("="^60)
-
-    times = 0.0:dt:T_max
-    use_interacting_formula = !iszero(post.V) || !iszero(pre.V)
-
-    local sites, psi, gates
-    F_vals = Float64[]
-    start_step = 1
-    total_fidelity = 1.0
-
-    if resume_from === nothing
-        sites = siteinds("Fermion", N_sites; conserve_qns=true)
-
-        # Threading is managed in the run script now!
-        
-        H_init = build_extended_tb_MPO_OBC(sites; p=pre)
-        init_state = product_state_Nf(N_sites, N_sites ÷ 2)
-        sweeps = Sweeps(nsweeps)
-        setmaxdim!(sweeps, maxdim...)
-        setcutoff!(sweeps, cutoff)
-
-        E0, psi = dmrg(H, MPS(sites, init_state), sweeps; observer=obs, outputlevel=0)
-        log("Initial Ground State Energy: $E0")
-    else
-        ckpt = load_checkpoint(resume_from)
-        psi = ckpt.psi
-        sites = siteinds(psi)
-        F_vals = ckpt.F_vals
-        total_fidelity = ckpt.total_fidelity
-        start_step = ckpt.step + 1
-        log("Loaded checkpoint at step $(ckpt.step), t = $(ckpt.t)")
-    end
-
-    # Build the gates using your corrected 3-site gate function
-    gates = build_extended_tb_tebd_gates(sites, post; dt=dt)
-
-    for (step, t) in enumerate(times)
-        step < start_step && continue
-        if length(F_vals) < step
-            F = measure_F(psi, N_sites, use_interacting_formula ? 1.0 : 0.0; a=subsystem_a, b=subsystem_b)
-            push!(F_vals, F)
-        end
-
-        psi = apply(gates, psi; cutoff=cutoff, maxdim=bond_dim)
-        norm_before = norm(psi)
-        normalize!(psi)
-        total_fidelity *= norm_before^2
-        chi = maxlinkdim(psi)
-
-        log("t = $(round(t, digits=3)), F = $(round(F_vals[step], digits=4)), χ = $chi / $bond_dim, cum_fidelity = $(round(total_fidelity, digits=6))")
-
-        if checkpoint_file !== nothing && step % checkpoint_every == 0
-            save_checkpoint(checkpoint_file, psi, step, t, Float64[], F_vals, total_fidelity)
-            log("Checkpoint saved at step $step")
-        end
-    end
-
-    if log_io !== nothing; close(log_io); end
-    return times, F_vals
 end
 
 function extract_bipartite_fluctuations_centered(N_sites::Int, p::ExtendedTBParams; 
@@ -1007,11 +797,10 @@ end
 function extract_bipartite_fluctuations_centered_new(N_sites::Int, p::ExtendedTBParams; 
                                                  l_min::Int=5, l_max::Union{Int, Nothing}=nothing,
                                                  margin::Int=20,
-                                                 nsweeps::Int=12,
+                                                 nsweeps::Int=20,
                                                  maxdim::Union{Vector{Int}, Nothing}=nothing,
                                                  cutoff::Float64=1e-10,
                                                  logfile::Union{String, Nothing}=nothing)
-    # Setup logger
     log_io = logfile === nothing ? nothing : open(logfile, "w")
     function log_msg(msg)
         println(msg)
@@ -1021,17 +810,12 @@ function extract_bipartite_fluctuations_centered_new(N_sites::Int, p::ExtendedTB
         end
     end
 
-    # Keep both subsystem edges at least `margin` sites away from the
-    # physical chain boundaries, so this stays a genuine bulk (two-cut)
-    # measurement rather than drifting back toward an edge-touching one.
     if l_max === nothing
         l_max = N_sites - 2*margin
     end
 
-    # Default growth schedule if none given; ramp up to a generous ceiling.
-    # No noise, deterministic product-state init -- validated recipe.
     if maxdim === nothing
-        ramp = [50, 100, 200, 400, 800, 1000, 1200, 1300, 1400, 1500, 1700, 1800]
+        ramp = [50, 100, 200, 400, 800, 1000, 1200, 1300, 1400, 1500, 1700, 1800, 2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700]
         maxdim = length(ramp) >= nsweeps ? ramp[1:nsweeps] :
                  vcat(ramp, fill(ramp[end], nsweeps - length(ramp)))
     end
@@ -1043,12 +827,12 @@ function extract_bipartite_fluctuations_centered_new(N_sites::Int, p::ExtendedTB
     log_msg("DMRG schedule: nsweeps=$nsweeps, maxdim=$maxdim, cutoff=$cutoff")
     log_msg("="^60)
 
-    # 1. Setup the system
     sites = siteinds("Fermion", N_sites; conserve_qns=true)
     H = build_extended_tb_MPO_OBC(sites; p=p)
-    init_state = product_state_Nf(N_sites, N_sites ÷ 2)
+    N_fill = N_sites ÷ 2
+    init_state = product_state_Nf(N_sites, N_fill)
+    psi0 = MPS(sites, init_state)
 
-    # 2. Get the ground state
     log_msg("Running DMRG to obtain the ground state...")
     t_dmrg_start = time()
 
@@ -1058,7 +842,7 @@ function extract_bipartite_fluctuations_centered_new(N_sites::Int, p::ExtendedTB
     setcutoff!(sweeps, cutoff)
     # deliberately no noise! call -- validated noise-free recipe
 
-    E0, psi = dmrg(H, MPS(sites, init_state), sweeps; observer=obs, outputlevel=0)
+    E0, psi = dmrg(H, psi0, sweeps; observer=obs, outputlevel=0)
 
     log_msg("DMRG completed in $(round(time() - t_dmrg_start, digits=2)) seconds.")
     log_msg("Ground state energy: $E0")
@@ -1070,7 +854,17 @@ function extract_bipartite_fluctuations_centered_new(N_sites::Int, p::ExtendedTB
     end
     log_msg("-"^60)
 
-    # 3. Measure fluctuations
+    # --- Ground-state quality checks, same recipe as
+    # compute_and_save_ground_state_ssh. ExtendedTBParams has no Δ field,
+    # so (unlike the SSH version) the mirror-symmetry check needs no
+    # gapped-staggered-potential exception here.
+    log_msg("Ground state quality checks:")
+    quality = check_ground_state_quality(psi, H, E0, N_fill; log_fn=log_msg)
+    n_profile = real.(expect(psi, "N"))
+    mirror_diff = maximum(abs.(n_profile .- reverse(n_profile)))
+    log_msg("  Max density mirror-symmetry violation: $mirror_diff")
+    log_msg("-"^60)
+
     log_msg("Measuring bipartite charge fluctuations for centered subsystems...")
     l_vals = Int[]
     F_vals = Float64[]
@@ -1086,308 +880,206 @@ function extract_bipartite_fluctuations_centered_new(N_sites::Int, p::ExtendedTB
     log_msg("-"^60)
     log_msg("Measurement completed in $(round(time() - t_measure_start, digits=2)) seconds.")
     log_msg("="^60)
+
     if log_io !== nothing
         close(log_io)
     end
-    return l_vals, F_vals
+    return l_vals, F_vals, E0, quality
 end
 
-function simulate_quench_only_fluctuations_extended_tebd_new(N_sites, T_max, dt, pre::ExtendedTBParams, post::ExtendedTBParams;
-                          bond_dim=1000, cutoff=1e-8, logfile=nothing,
-                          checkpoint_file=nothing, checkpoint_every=20,
-                          resume_from=nothing,
-                          subsystem_a=1, subsystem_b=N_sites ÷ 2,
-                          gs_nsweeps::Int=12,
-                          gs_maxdim::Union{Vector{Int},Nothing}=nothing,
-                          gs_cutoff::Float64=1e-10)
-
+function evolve_from_ground_state_fluctuations(savefile::String, T_max, dt, post::Union{ExtendedTBParams, SSHParams};
+                                   bond_dim=1000, cutoff=1e-8, logfile=nothing,
+                                   checkpoint_file=nothing, checkpoint_every=20,
+                                   resume_from=nothing,
+                                   subsystem_a=1, subsystem_b=nothing,
+                                   fluctuations_every::Int=1)
+    fluctuations_every >= 1 || throw(ArgumentError("fluctuations_every must be >= 1, got $fluctuations_every"))
+ 
     log_io = logfile === nothing ? nothing : open(logfile, "w")
     function log(msg)
         println(msg)
         if log_io !== nothing
-            println(log_io, msg)
-            flush(log_io)
+            println(log_io, msg); flush(log_io)
         end
     end
-
-    log("="^60)
-    log("Quench simulation started: $(now())")
-    log("N_sites = $N_sites, T_max = $T_max, dt = $dt, bond_dim = $bond_dim, cutoff = $cutoff")
-    log("Pre-quench parameters: t0=$(pre.t0), t2=$(pre.t2), V=$(pre.V)")
-    log("Post-quench parameters: t0=$(post.t0), t2=$(post.t2), V=$(post.V)")
-    log("Subsystem for F: sites $subsystem_a:$subsystem_b " *
-        "(touches left edge: $(subsystem_a==1), touches right edge: $(subsystem_b==N_sites))")
-    if resume_from !== nothing
-        log("Resuming from checkpoint: $resume_from")
-    end
-    log("="^60)
-
+ 
     times = 0.0:dt:T_max
-    use_interacting_formula = !iszero(post.V) || !iszero(pre.V)
-
-    local sites, psi, gates
     F_vals = Float64[]
+    S_EE_vals = Float64[]
     start_step = 1
     total_fidelity = 1.0
-
+    local psi, sites
+ 
     if resume_from === nothing
-        sites = siteinds("Fermion", N_sites; conserve_qns=true)
-
-        H_init = build_extended_tb_MPO_OBC(sites; p=pre)
-        init_state = product_state_Nf(N_sites, N_sites ÷ 2)
-
-        # Ground-state DMRG schedule -- deterministic init, no noise,
-        # validated recipe (matches exact free-fermion ED to ~1e-4 in K).
-        if gs_maxdim === nothing
-            ramp = [50, 100, 200, 400, 800, 1000, 1200, 1300, 1400, 1500, 1700, 1800]
-            gs_maxdim = length(ramp) >= gs_nsweeps ? ramp[1:gs_nsweeps] :
-                        vcat(ramp, fill(ramp[end], gs_nsweeps - length(ramp)))
+        psi, E0, N_sites, N_fill, pre = load_ground_state(savefile)
+        actual_N = round(Int, real(sum(expect(psi, "N"))))
+        if actual_N != N_fill
+            log("*** Warning: loaded psi has N = $actual_N particles but file records N_fill = $N_fill -" * 
+                "possible save/load mismatch.")
         end
-
-        sweeps = Sweeps(gs_nsweeps)
-        setmaxdim!(sweeps, gs_maxdim...)
-        setcutoff!(sweeps, gs_cutoff)
-        # deliberately no noise! call -- validated noise-free recipe
-
-        obs = BondDimObserver(log)
-        E0, psi = dmrg(H_init, MPS(sites, init_state), sweeps; observer=obs, outputlevel=0)
-
-        log("Initial Ground State Energy: $E0")
-        log("Initial ground state max bond dimension: $(maxlinkdim(psi))")
-        log("Ground-state bond dim history: $(obs.sweep_bonddims)")
-        if obs.sweep_bonddims[end] >= gs_maxdim[end] - 5
-            log("*** WARNING: pre-quench ground state bond dim is at/near maxdim cap ($(gs_maxdim[end])).")
-            log("*** Consider raising gs_maxdim to check convergence.")
-        end
+        sites = siteinds(psi)
+        subsystem_b = subsystem_b === nothing ? N_sites ÷ 2 : subsystem_b
+ 
+        log("="^60)
+        log("Quench started from saved ground state: $(now())")
+        log("Loaded from $savefile (E0=$E0, pre: $(describe_params(pre)))")
+        log("Post-quench: $(describe_params(post))")
+        log("Subsystem for F: sites $subsystem_a:$subsystem_b")
+        log("="^60)
     else
         ckpt = load_checkpoint(resume_from)
         psi = ckpt.psi
         sites = siteinds(psi)
+        subsystem_b = subsystem_b === nothing ? length(sites) ÷ 2 : subsystem_b
         F_vals = ckpt.F_vals
+        S_EE_vals = ckpt.S_EE_vals
         total_fidelity = ckpt.total_fidelity
         start_step = ckpt.step + 1
-        log("Loaded checkpoint at step $(ckpt.step), t = $(ckpt.t)")
+        expected = (ckpt.step - 1) ÷ fluctuations_every + 1   # F measurements done up to ckpt.step
+        length(F_vals) == expected || error(
+            "Checkpoint holds $(length(F_vals)) F values at step $(ckpt.step), " *
+            "expected $expected for fluctuations_every=$fluctuations_every " *
+            "(different fluctuations_every than the original run?)")
+        log("Resuming from checkpoint: $resume_from at step $(ckpt.step)")
     end
-
-    # Build the gates using your corrected 3-site gate function
-    gates = build_extended_tb_tebd_gates(sites, post; dt=dt)
-
+ 
+    use_interacting_formula = !iszero(post.V)
+    gates = build_tebd_gates(sites, post; dt=dt)
+ 
     for (step, t) in enumerate(times)
         step < start_step && continue
-        if length(F_vals) < step
-            F = measure_F(psi, N_sites, use_interacting_formula ? 1.0 : 0.0; a=subsystem_a, b=subsystem_b)
+        # Measure at steps 1, 1+n, 1+2n, ... (state at time t, before this step's gates)
+        measured = false
+        if (step - 1) % fluctuations_every == 0 && length(F_vals) < (step - 1) ÷ fluctuations_every + 1
+            F = measure_F(psi, length(sites), use_interacting_formula ? post.V : 0.0;
+                           a=subsystem_a, b=subsystem_b)
             push!(F_vals, F)
+            measured = true
         end
-
+ 
         psi = apply(gates, psi; cutoff=cutoff, maxdim=bond_dim)
         norm_before = norm(psi)
         normalize!(psi)
         total_fidelity *= norm_before^2
         chi = maxlinkdim(psi)
-
-        log("t = $(round(t, digits=3)), F = $(round(F_vals[step], digits=4)), χ = $chi / $bond_dim, cum_fidelity = $(round(total_fidelity, digits=6))")
-
+ 
+        msg = "t = $(round(t, digits=3)), "
+        measured && (msg *= "F = $(round(F_vals[end], digits=4)), ")
+        msg *= "χ = $chi / $bond_dim, cum_fidelity = $(round(total_fidelity, digits=6))"
+        log(msg)
+ 
         if checkpoint_file !== nothing && step % checkpoint_every == 0
-            save_checkpoint(checkpoint_file, psi, step, t, Float64[], F_vals, total_fidelity)
+            save_checkpoint(checkpoint_file, psi, step, t, S_EE_vals, F_vals, total_fidelity)
             log("Checkpoint saved at step $step")
         end
     end
-
+ 
     if log_io !== nothing; close(log_io); end
-    return times, F_vals
+    return times[1:fluctuations_every:end], F_vals
 end
 
-function simulate_quench_only_fluctuations_new(N_sites, T_max, dt, pre::SSHParams, post::SSHParams;
-                          bond_dim=1000, cutoff=1e-8, logfile=nothing,
-                          checkpoint_file=nothing, checkpoint_every=20,
-                          resume_from=nothing, 
-                          subsystem_a=1, subsystem_b=N_sites ÷ 2,
-                          gs_nsweeps::Int=12,
-                          gs_maxdim::Union{Vector{Int},Nothing}=nothing,
-                          gs_cutoff::Float64=1e-10)
-
+# ---------------------------------------------------------------------------
+# Same quench protocol as evolve_from_ground_state_fluctuations, but measuring
+# the entanglement entropy S_EE of the subsystem [subsystem_a, subsystem_b]
+# every `entropy_every` steps (first measurement at t = 0, i.e. step 1).
+# Uses measure_S_EE: a == 1 -> single cut at bond b|b+1 (default: half chain),
+# b == N -> single cut at a-1|a, otherwise the bulk-interval routine.
+# Returns (measurement times, S_EE values). F is NOT computed here.
+# Checkpoints: use a different checkpoint_file from the fluctuations run, and
+# resume with the same entropy_every.
+# ---------------------------------------------------------------------------
+function evolve_from_ground_state_entropy(savefile::String, T_max, dt, post::Union{ExtendedTBParams, SSHParams};
+                                          entropy_every::Int=1,
+                                          bond_dim=1000, cutoff=1e-8, logfile=nothing,
+                                          checkpoint_file=nothing, checkpoint_every=20,
+                                          resume_from=nothing,
+                                          subsystem_a=1, subsystem_b=nothing)
+    entropy_every >= 1 || throw(ArgumentError("entropy_every must be >= 1, got $entropy_every"))
+ 
     log_io = logfile === nothing ? nothing : open(logfile, "w")
     function log(msg)
         println(msg)
         if log_io !== nothing
-            println(log_io, msg)
-            flush(log_io)
+            println(log_io, msg); flush(log_io)
         end
     end
-
-    log("="^60)
-    log("Quench simulation started: $(now())")
-    log("N_sites = $N_sites, T_max = $T_max, dt = $dt, bond_dim = $bond_dim, cutoff = $cutoff")
-    log("Pre-quench parameters: v=$(pre.v), w=$(pre.w), Δ=$(pre.Δ), V=$(pre.V)")
-    log("Post-quench parameters: v=$(post.v), w=$(post.w), Δ=$(post.Δ), V=$(post.V)")
-    log("Subsystem for F: sites $subsystem_a:$subsystem_b " *
-        "(touches left edge: $(subsystem_a==1), touches right edge: $(subsystem_b==N_sites))")
-    if resume_from !== nothing
-        log("Resuming from checkpoint: $resume_from")
-    end
-    log("="^60)
-
+ 
     times = 0.0:dt:T_max
-    use_interacting_formula = !iszero(post.V) || !iszero(pre.V)
-
-    local sites, psi, gates
-    S_EE_vals = Float64[]   # kept for compatibility, not used in this simulation
-    F_vals = Float64[]
+    S_EE_vals = Float64[]
     start_step = 1
     total_fidelity = 1.0
-
+    local psi, sites
+ 
     if resume_from === nothing
-        # --- Fresh start: build sites and ground state using a robust DMRG schedule ---
-        sites = siteinds("Fermion", N_sites; conserve_qns=true)
-
-        H_init = build_SSH_MPO_OBC(sites; p=pre)
-        init_state = product_state_Nf(N_sites, N_sites ÷ 2)
-
-        # Ground-state DMRG schedule -- deterministic init, no noise,
-        # validated recipe (matches exact free-fermion ED to ~1e-4 in K).
-        if gs_maxdim === nothing
-            ramp = [50, 100, 200, 400, 800, 1000, 1200, 1300, 1400, 1500, 1700, 1800]
-            gs_maxdim = length(ramp) >= gs_nsweeps ? ramp[1:gs_nsweeps] :
-                        vcat(ramp, fill(ramp[end], gs_nsweeps - length(ramp)))
+        psi, E0, N_sites, N_fill, pre = load_ground_state(savefile)
+        actual_N = round(Int, real(sum(expect(psi, "N"))))
+        if actual_N != N_fill
+            log("*** Warning: loaded psi has N = $actual_N particles but file records N_fill = $N_fill -" *
+                "possible save/load mismatch.")
         end
-
-        sweeps = Sweeps(gs_nsweeps)
-        setmaxdim!(sweeps, gs_maxdim...)
-        setcutoff!(sweeps, gs_cutoff)
-        # deliberately no noise! – validated noise‑free recipe
-
-        obs = BondDimObserver(log)
-        t_dmrg_start = time()
-        E0, psi = dmrg(H_init, MPS(sites, init_state), sweeps; observer=obs, outputlevel=0)
-        dmrg_time = round(time() - t_dmrg_start, digits=2)
-
-        log("Initial Ground State Energy: $E0 (DMRG took $dmrg_time seconds)")
-        log("Initial ground state max bond dimension: $(maxlinkdim(psi))")
-        log("Ground-state bond dim history: $(obs.sweep_bonddims)")
-        if obs.sweep_bonddims[end] >= gs_maxdim[end] - 5
-            log("*** WARNING: pre-quench ground state bond dim is at/near maxdim cap ($(gs_maxdim[end])).")
-            log("*** Consider raising gs_maxdim to check convergence.")
-        end
-
+        sites = siteinds(psi)
+        subsystem_b = subsystem_b === nothing ? N_sites ÷ 2 : subsystem_b
+ 
+        log("="^60)
+        log("Quench started from saved ground state: $(now())")
+        log("Loaded from $savefile (E0=$E0, pre: $(describe_params(pre)))")
+        log("Post-quench: $(describe_params(post))")
+        log("Entropy of sites $subsystem_a:$subsystem_b every $entropy_every steps")
+        log("="^60)
     else
-        # --- Resume: load state and history from checkpoint ---
         ckpt = load_checkpoint(resume_from)
         psi = ckpt.psi
         sites = siteinds(psi)
+        subsystem_b = subsystem_b === nothing ? length(sites) ÷ 2 : subsystem_b
         S_EE_vals = ckpt.S_EE_vals
-        F_vals = ckpt.F_vals
         total_fidelity = ckpt.total_fidelity
         start_step = ckpt.step + 1
-        log("Loaded checkpoint at step $(ckpt.step), t = $(ckpt.t), " *
-            "cumulative fidelity so far = $(round(total_fidelity, digits=6))")
+        expected = (ckpt.step - 1) ÷ entropy_every + 1      # measurements done up to ckpt.step
+        length(S_EE_vals) == expected || error(
+            "Checkpoint holds $(length(S_EE_vals)) entropy values at step $(ckpt.step), " *
+            "expected $expected for entropy_every=$entropy_every (different entropy_every, " *
+            "or a checkpoint from another routine?)")
+        log("Resuming from checkpoint: $resume_from at step $(ckpt.step)")
     end
-
-    # Build the TEBD gates for the post‑quench Hamiltonian
-    log("Constructing TEBD gates for quench (post-resume bond_dim=$bond_dim, cutoff=$cutoff)...")
+ 
+    N = length(sites)
     gates = build_tebd_gates(sites, post; dt=dt)
-
-    log("Starting time evolution...")
-    t_evolution_start = time()
-
+ 
     for (step, t) in enumerate(times)
-        step < start_step && continue  # skip steps already done before the checkpoint
-
-        if step >= start_step && length(F_vals) < step
-            # only measure if we don't already have this step's values from a checkpoint
-            F = measure_F(psi, N_sites, use_interacting_formula ? 1.0 : 0.0; 
-                                            a=subsystem_a, b=subsystem_b)
-            push!(F_vals, F)
-        else
-            F = F_vals[step]
+        step < start_step && continue
+ 
+        # Measure at steps 1, 1+n, 1+2n, ... (state at time t, before this step's gates)
+        measured = false
+        if (step - 1) % entropy_every == 0 && length(S_EE_vals) < (step - 1) ÷ entropy_every + 1
+            push!(S_EE_vals, measure_S_EE(psi, N; a=subsystem_a, b=subsystem_b))
+            measured = true
         end
-
-        step_start = time()
-
+ 
         psi = apply(gates, psi; cutoff=cutoff, maxdim=bond_dim)
-        norm_before = norm(psi)          # truncation‑error diagnostic
+        norm_before = norm(psi)
         normalize!(psi)
-        step_time = round(time() - step_start, digits=4)
-
-        # Cumulative fidelity estimate: since the gates are unitary, any norm
-        # loss at this step is purely truncation. norm_before^2 approximates
-        # the fraction of weight kept at this step; multiplying across steps
-        # gives a running lower‑bound‑ish estimate of overlap with the exact
-        # (untruncated) state.
         total_fidelity *= norm_before^2
-
         chi = maxlinkdim(psi)
-        elapsed_time = round(time() - t_evolution_start, digits=4)
-        eta = (elapsed_time / (step - start_step + 1)) * (length(times) - step)
-
-        log("t = $(round(t, digits=3)), " *
-            "F = $(round(F, digits=4)), χ = $chi / $bond_dim, " *
-            "norm_before = $(round(norm_before, digits=8)), " *
-            "cum_fidelity = $(round(total_fidelity, digits=6)), " *
-            "step_time = $step_time s, elapsed_time = $elapsed_time s, " *
-            "estimated_remaining_time = $(round(eta, digits=4)) s")
-
-        if chi >= bond_dim
-            log("Warning: Maximum bond dimension reached at t = $t. Consider increasing bond_dim.")
-        end
-        if total_fidelity < 0.99
-            log("Warning: cumulative truncation error has exceeded 1% (cum_fidelity = " *
-                "$(round(total_fidelity, digits=6))) at t = $t. Dynamics beyond this point " *
-                "should be treated with caution.")
-        end
-
+ 
+        msg = "t = $(round(t, digits=3)), χ = $chi / $bond_dim, " *
+              "cum_fidelity = $(round(total_fidelity, digits=6))"
+        measured && (msg *= ", S_EE = $(round(S_EE_vals[end], digits=5))")
+        log(msg)
+ 
         if checkpoint_file !== nothing && step % checkpoint_every == 0
-            save_checkpoint(checkpoint_file, psi, step, t, S_EE_vals, F_vals, total_fidelity)
-            log("Checkpoint saved at step $step (t = $t) -> $checkpoint_file")
+            save_checkpoint(checkpoint_file, psi, step, t, S_EE_vals, Float64[], total_fidelity)
+            log("Checkpoint saved at step $step")
         end
     end
-
-    if checkpoint_file !== nothing
-        save_checkpoint(checkpoint_file, psi, length(times), times[end], S_EE_vals, F_vals, total_fidelity)
-        log("Final checkpoint saved -> $checkpoint_file")
-    end
-
-    log("="^60)
-    log("Quench simulation completed: $(now())")
-    log("Total time evolution duration: $(round((time() - t_evolution_start)/60, digits=2)) min")
-    log("Final cumulative fidelity estimate: $(round(total_fidelity, digits=6))")
-    log("="^60)
-
-    if log_io !== nothing
-        close(log_io)
-    end
-
-    return times, F_vals
+ 
+    if log_io !== nothing; close(log_io); end
+    return times[1:entropy_every:end], S_EE_vals
 end
 
-function check_ground_state_quality(psi::MPS, H::MPO, E0::Float64, N_expected::Int;
-                                     variance_cutoff::Float64=1e-12,
-                                     variance_maxdim::Union{Int,Nothing}=nothing,
-                                     log_fn::Function=println)
-    # 1. Particle number: sanity check on MPS/site-index construction only --
-    #    NOT a test of ground-state convergence. conserve_qns=true makes this
-    #    exact by construction regardless of whether DMRG actually found the
-    #    ground state; a mismatch here would flag a bug elsewhere, not
-    #    non-convergence.
-    N_tot = real(sum(expect(psi, "N")))
-    log_fn("  Total particle number: $N_tot (expected: $N_expected, diff: $(abs(N_tot-N_expected)))")
 
-    # 2. Energy variance <H^2> - <H>^2. This IS a genuine eigenstate-quality
-    #    test: should be ~0 (up to truncation error from the one apply(H,psi)
-    #    below) for a true eigenstate. Nonzero variance flags non-convergence
-    #    or excited-state contamination.
-    vm = variance_maxdim === nothing ? 4 * maxlinkdim(psi) : variance_maxdim
-    Hpsi = apply(H, psi; cutoff=variance_cutoff, maxdim=vm)
-    E2 = real(inner(Hpsi, Hpsi))
-    variance = E2 - E0^2
-    log_fn("  Energy variance <H^2>-<H>^2 = $variance (should be ~0 for a true eigenstate)")
-
-    return (N_tot=N_tot, variance=variance)
-end
-
-using HDF5
-
-function compute_and_save_ground_state(N_sites::Int, p::ExtendedTBParams, savefile::String;
-                                        nsweeps::Int=12,
+function compute_and_save_ground_state(N_sites::Int, p::Union{ExtendedTBParams, SSHParams}, savefile::String;
+                                        Nf::Union{Int,Nothing}=nothing, 
+                                        nsweeps::Int=23,
                                         maxdim::Union{Vector{Int},Nothing}=nothing,
                                         cutoff::Float64=1e-10,
                                         logfile::Union{String,Nothing}=nothing)
@@ -1401,16 +1093,17 @@ function compute_and_save_ground_state(N_sites::Int, p::ExtendedTBParams, savefi
 
     log("="^60)
     log("Ground state computation started: $(now())")
-    log("N_sites = $N_sites, t0=$(p.t0), t2=$(p.t2), V=$(p.V)")
+    log("N_sites = $N_sites, $(describe_params(p))")
     log("="^60)
 
     sites = siteinds("Fermion", N_sites; conserve_qns=true)
-    H = build_extended_tb_MPO_OBC(sites; p=p)
-    N_fill = N_sites ÷ 2
+    H = build_hamiltonian_MPO(sites, p)
+    
+    N_fill = Nf === nothing ? N_sites ÷ 2 : Nf
     init_state = product_state_Nf(N_sites, N_fill)
 
     if maxdim === nothing
-        ramp = [50, 100, 200, 400, 800, 1000, 1200, 1300, 1400, 1500, 1700, 1800]
+        ramp = [50, 100, 200, 400, 800, 900, 1000, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700]
         maxdim = length(ramp) >= nsweeps ? ramp[1:nsweeps] :
                  vcat(ramp, fill(ramp[end], nsweeps - length(ramp)))
     end
@@ -1443,9 +1136,8 @@ function compute_and_save_ground_state(N_sites::Int, p::ExtendedTBParams, savefi
         write(f, "psi", psi)
         write(f, "E0", E0)
         write(f, "N_sites", N_sites)
-        write(f, "t0", p.t0)
-        write(f, "t2", p.t2)
-        write(f, "V", p.V)
+        write(f, "N_fill", N_fill)
+        write_params(f, p)
     end
     log("Ground state saved to $savefile")
     log("="^60)
@@ -1455,84 +1147,38 @@ function compute_and_save_ground_state(N_sites::Int, p::ExtendedTBParams, savefi
 end
 
 function load_ground_state(savefile::String)
-    local psi, E0, N_sites, t0, t2, V
+    local psi, E0, N_sites, N_fill, params
     h5open(savefile, "r") do f
         psi = read(f, "psi", MPS)
         E0 = read(f, "E0")
         N_sites = read(f, "N_sites")
-        t0 = read(f, "t0")
-        t2 = read(f, "t2")
-        V = read(f, "V")
+        N_fill = read(f, "N_fill")
+        params = read_params(f)      # ExtendedTBParams or SSHParams
     end
-    return psi, E0, N_sites, ExtendedTBParams(t0=t0, t2=t2, V=V)
+    return psi, E0, N_sites, N_fill, params
 end
 
-function evolve_from_ground_state(savefile::String, T_max, dt, post::ExtendedTBParams;
-                                   bond_dim=1000, cutoff=1e-8, logfile=nothing,
-                                   checkpoint_file=nothing, checkpoint_every=20,
-                                   resume_from=nothing,
-                                   subsystem_a=1, subsystem_b=nothing)
-    log_io = logfile === nothing ? nothing : open(logfile, "w")
-    function log(msg)
-        println(msg)
-        if log_io !== nothing
-            println(log_io, msg); flush(log_io)
-        end
-    end
+function check_ground_state_quality(psi::MPS, H::MPO, E0::Float64, N_expected::Int;
+                                     variance_cutoff::Float64=1e-12,
+                                     variance_maxdim::Union{Int,Nothing}=nothing,
+                                     log_fn::Function=println)
+    # 1. Particle number: sanity check on MPS/site-index construction only --
+    #    NOT a test of ground-state convergence. conserve_qns=true makes this
+    #    exact by construction regardless of whether DMRG actually found the
+    #    ground state; a mismatch here would flag a bug elsewhere, not
+    #    non-convergence.
+    N_tot = real(sum(expect(psi, "N")))
+    log_fn("  Total particle number: $N_tot (expected: $N_expected, diff: $(abs(N_tot-N_expected)))")
 
-    times = 0.0:dt:T_max
-    F_vals = Float64[]
-    start_step = 1
-    total_fidelity = 1.0
-    local psi, sites
+    # 2. Energy variance <H^2> - <H>^2. This IS a genuine eigenstate-quality
+    #    test: should be ~0 (up to truncation error from the one apply(H,psi)
+    #    below) for a true eigenstate. Nonzero variance flags non-convergence
+    #    or excited-state contamination.
+    vm = variance_maxdim === nothing ? 4 * maxlinkdim(psi) : variance_maxdim
+    Hpsi = apply(H, psi; cutoff=variance_cutoff, maxdim=vm)
+    E2 = real(inner(Hpsi, Hpsi))
+    variance = E2 - E0^2
+    log_fn("  Energy variance <H^2>-<H>^2 = $variance (should be ~0 for a true eigenstate)")
 
-    if resume_from === nothing
-        psi, E0, N_sites, pre = load_ground_state(savefile)
-        sites = siteinds(psi)
-        subsystem_b = subsystem_b === nothing ? N_sites ÷ 2 : subsystem_b
-
-        log("="^60)
-        log("Quench started from saved ground state: $(now())")
-        log("Loaded from $savefile (E0=$E0, pre: t0=$(pre.t0), t2=$(pre.t2), V=$(pre.V))")
-        log("Post-quench: t0=$(post.t0), t2=$(post.t2), V=$(post.V)")
-        log("Subsystem for F: sites $subsystem_a:$subsystem_b")
-        log("="^60)
-    else
-        ckpt = load_checkpoint(resume_from)
-        psi = ckpt.psi
-        sites = siteinds(psi)
-        F_vals = ckpt.F_vals
-        total_fidelity = ckpt.total_fidelity
-        start_step = ckpt.step + 1
-        log("Resuming from checkpoint: $resume_from at step $(ckpt.step)")
-    end
-
-    use_interacting_formula = !iszero(post.V)
-    gates = build_extended_tb_tebd_gates(sites, post; dt=dt)
-
-    for (step, t) in enumerate(times)
-        step < start_step && continue
-        if length(F_vals) < step
-            F = measure_F(psi, length(sites), use_interacting_formula ? post.V : 0.0;
-                           a=subsystem_a, b=subsystem_b)
-            push!(F_vals, F)
-        end
-
-        psi = apply(gates, psi; cutoff=cutoff, maxdim=bond_dim)
-        norm_before = norm(psi)
-        normalize!(psi)
-        total_fidelity *= norm_before^2
-        chi = maxlinkdim(psi)
-
-        log("t = $(round(t, digits=3)), F = $(round(F_vals[step], digits=4)), " *
-            "χ = $chi / $bond_dim, cum_fidelity = $(round(total_fidelity, digits=6))")
-
-        if checkpoint_file !== nothing && step % checkpoint_every == 0
-            save_checkpoint(checkpoint_file, psi, step, t, Float64[], F_vals, total_fidelity)
-            log("Checkpoint saved at step $step")
-        end
-    end
-
-    if log_io !== nothing; close(log_io); end
-    return times, F_vals
+    return (N_tot=N_tot, variance=variance)
 end

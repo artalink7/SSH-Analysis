@@ -17,6 +17,7 @@ data/**/*.csv
 *.csv
 *.txt
 *.dat
+/ground_state
 
 # Ignore Python/Jupyter artifacts
 __pycache__/
